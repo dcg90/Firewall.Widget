@@ -20,34 +20,11 @@ namespace FirewallWidget.Manager.Services
 
     public class FirewallService : IFirewallService
     {
-        private static readonly IEnumerable<Group> groupedRules;
+        private static ICollection<Group> groupedRules;
 
         static FirewallService()
         {
-            var firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-            var rules = new List<FirewallRuleDto>();
-
-            foreach (INetFwRule3 r in firewallPolicy.Rules)
-            {
-                rules.Add(new FirewallRuleDto
-                {
-                    Profile = (ProfileDto)r.Profiles,
-                    Name = r.Name,
-                    ProgramPath = r.ApplicationName,
-                    Direction = (RuleDirectionDto)r.Direction,
-                    FwRule = r
-                });
-            }
-
-            groupedRules = from r in rules
-                           orderby r.Name
-                           group r by new { r.Profile, r.Direction } into g
-                           select new Group
-                           {
-                               Profile = g.Key.Profile,
-                               Direction = g.Key.Direction,
-                               Rules = g
-                           };
+            LoadFirewallRules();
         }
 
         public IEnumerable<FirewallRuleDto> GetRules(ProfileDto profile, RuleDirectionDto direction)
@@ -85,6 +62,11 @@ namespace FirewallWidget.Manager.Services
             throw new InvalidOperationException("Rule " + name + " doesn't exists.");
         }
 
+        public void Refresh()
+        {
+            LoadFirewallRules();
+        }
+
         private bool TryGetRule(string name, ProfileDto profile, RuleDirectionDto direction, out FirewallRuleDto rule)
         {
             rule = null;
@@ -101,5 +83,54 @@ namespace FirewallWidget.Manager.Services
             return false;
         }
 
+        private static void LoadFirewallRules()
+        {
+            var firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+            var rules = new List<INetFwRule3>();
+
+            foreach (INetFwRule3 r in firewallPolicy.Rules)
+            { rules.Add(r); }
+
+            var allGroups = from r in rules
+                            orderby r.Name
+                            group r by new { r.Profiles, r.Direction } into g
+                            select new { g.Key.Profiles, g.Key.Direction, Rules = g };
+
+            groupedRules = new List<Group>();
+
+            foreach (var group in allGroups)
+            {
+                foreach (int profile in Enum.GetValues(typeof(ProfileDto)))
+                {
+                    if ((profile & group.Profiles) == profile)
+                    {
+                        var g = groupedRules.FirstOrDefault(
+                            gi => (int)gi.Profile == profile &&
+                                  gi.Direction == (RuleDirectionDto)group.Direction);
+                        if (g == null)
+                        {
+                            g = new Group
+                            {
+                                Direction = (RuleDirectionDto)group.Direction,
+                                Profile = (ProfileDto)profile,
+                                Rules = Enumerable.Empty<FirewallRuleDto>()
+                            };
+                            groupedRules.Add(g);
+                        }
+                        g.Rules = g.Rules.Concat(group.Rules.Select(ri => new FirewallRuleDto
+                        {
+                            Direction = (RuleDirectionDto)group.Direction,
+                            Name = ri.Name,
+                            Profile = (ProfileDto)profile,
+                            ProgramPath = ri.ApplicationName,
+                            FwRule = ri
+                        }));
+                    }
+                }
+            }
+
+            foreach (var group in groupedRules)
+            { group.Rules = group.Rules.OrderBy(r => r.Name); }
+        }
     }
 }

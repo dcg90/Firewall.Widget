@@ -92,6 +92,12 @@ namespace FirewallWidget.ChildForms
             }
 
         }
+
+        private void BtnRefreshRules_Click(object sender, EventArgs e)
+        {
+            firewallService.Refresh();
+            LoadRules();
+        }
     }
 
     internal class RuleItem

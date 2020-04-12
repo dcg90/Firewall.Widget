@@ -13,5 +13,7 @@ namespace FirewallWidget.Manager.Contracts.Services
         bool Exists(string name, ProfileDto profile, RuleDirectionDto direction);
 
         bool SwitchEnabled(string name, ProfileDto profile, RuleDirectionDto direction);
+
+        void Refresh();
     }
 }
