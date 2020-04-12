@@ -127,5 +127,10 @@ namespace FirewallWidget.Presentation
             Size = new Size(42, Screen.PrimaryScreen.WorkingArea.Height);
             Location = new Point(-40, 0);
         }
+
+        private void OptionsMenu_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+        {
+            HideForm(sender, e);
+        }
     }
 }

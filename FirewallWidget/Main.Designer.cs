@@ -82,19 +82,20 @@
             this.addRulesToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.optionsMenu.Name = "optionsMenu";
-            this.optionsMenu.Size = new System.Drawing.Size(125, 48);
+            this.optionsMenu.Size = new System.Drawing.Size(181, 70);
+            this.optionsMenu.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.OptionsMenu_Closed);
             // 
             // addRulesToolStripMenuItem
             // 
             this.addRulesToolStripMenuItem.Name = "addRulesToolStripMenuItem";
-            this.addRulesToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.addRulesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.addRulesToolStripMenuItem.Text = "&Add rules";
             this.addRulesToolStripMenuItem.Click += new System.EventHandler(this.AddRulesToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
             // 
