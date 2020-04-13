@@ -197,5 +197,15 @@ namespace FirewallWidget.Presentation
         {
             HideForm();
         }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var @params = base.CreateParams;
+                @params.ExStyle |= 0x80;
+                return @params;
+            }
+        }
     }
 }
