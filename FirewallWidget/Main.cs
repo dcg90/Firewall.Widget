@@ -69,8 +69,7 @@ namespace FirewallWidget.Presentation
                 Size = icon.Size,
                 Cursor = Cursors.Hand,
             };
-            var toolTip = new ToolTip();
-            toolTip.SetToolTip(pbox, rule.Name);
+            ruleNameToolTip.SetToolTip(pbox, rule.Name);
             pbox.Click += (sender, e) =>
             {
                 try
