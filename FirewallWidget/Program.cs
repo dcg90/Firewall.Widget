@@ -5,6 +5,7 @@ using FirewallWidget.Presentation;
 using Microsoft.Extensions.DependencyInjection;
 
 using System;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace FirewallWidget
@@ -19,6 +20,13 @@ namespace FirewallWidget
         [STAThread]
         private static void Main()
         {
+            var p = Process.GetCurrentProcess();
+            if (Process.GetProcessesByName(p.ProcessName).Length > 1)
+            {
+                MessageBox.Show("The widget is already running.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             var services = new ServiceCollection();
             new Startup().Configure(services);
 
