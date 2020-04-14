@@ -38,28 +38,34 @@ namespace FirewallWidget.Manager.Services
             return Enumerable.Empty<FirewallRuleDto>();
         }
 
-        public bool IsEnabled(string name, ProfileDto profile, RuleDirectionDto direction)
+        public bool IsEnabled(FirewallRuleDto rule)
         {
-            if (TryGetRule(name, profile, direction, out var rule))
-            { return rule.FwRule.Enabled; }
+            var fwRule = ExtractFwRule(rule);
+            if (fwRule != null)
+            { return fwRule.Enabled; }
 
-            throw new InvalidOperationException("Rule " + name + " doesn't exists.");
+            throw DontExistOrSeveralFound(rule);
         }
 
-        public bool Exists(string name, ProfileDto profile, RuleDirectionDto direction)
+
+        public IEnumerable<FirewallRuleDto> GetMatchingRules(
+            string name, ProfileDto profile, RuleDirectionDto direction)
         {
-            return TryGetRule(name, profile, direction, out var _);
+            TryGetRules(name, profile, direction, out var rules);
+            return rules;
         }
 
-        public bool SwitchEnabled(string name, ProfileDto profile, RuleDirectionDto direction)
+        public bool SwitchEnabled(FirewallRuleDto rule)
         {
-            if (TryGetRule(name, profile, direction, out var rule))
+            var fwRule = ExtractFwRule(rule);
+            if (fwRule != null)
             {
-                rule.FwRule.Enabled = !rule.FwRule.Enabled;
-                return rule.FwRule.Enabled;
+                fwRule.Enabled = !fwRule.Enabled;
+                return fwRule.Enabled;
             }
 
-            throw new InvalidOperationException("Rule " + name + " doesn't exists.");
+            throw DontExistOrSeveralFound(rule);
+
         }
 
         public void Refresh()
@@ -67,20 +73,33 @@ namespace FirewallWidget.Manager.Services
             LoadFirewallRules();
         }
 
-        private bool TryGetRule(string name, ProfileDto profile, RuleDirectionDto direction, out FirewallRuleDto rule)
+        private INetFwRule3 ExtractFwRule(FirewallRuleDto rule)
         {
-            rule = null;
-
-            foreach (var r in GetRules(profile, direction))
+            if (rule != null)
             {
-                if (r.Name == name)
-                {
-                    rule = r;
-                    return true;
-                }
+                if (rule.FwRule != null)
+                { return rule.FwRule; }
+
+                if (TryGetRules(rule.Name, rule.Profile, rule.Direction, out var rules) && rules.Count() == 1)
+                { return rules.Single().FwRule; }
             }
 
-            return false;
+            return null;
+        }
+
+        private static InvalidOperationException DontExistOrSeveralFound(FirewallRuleDto rule)
+        {
+            return new InvalidOperationException("Rule " + rule?.Name + " doesn't exists.");
+        }
+
+        private bool TryGetRules(
+            string name, ProfileDto profile, RuleDirectionDto direction,
+            out IEnumerable<FirewallRuleDto> matchingRules)
+        {
+            matchingRules = GetRules(profile, direction)
+                .Where(r => r.Name == name);
+
+            return matchingRules.Count() > 0;
         }
 
         private static void LoadFirewallRules()

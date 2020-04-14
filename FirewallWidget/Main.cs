@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace FirewallWidget.Presentation
@@ -34,47 +35,80 @@ namespace FirewallWidget.Presentation
 
             foreach (var rule in ruleService.ReadAll())
             {
-                if (!firewallService.Exists(rule.Name, rule.Profile, rule.Direction) ||
-                    !File.Exists(rule.ProgramPath))
-                {
-                    if (MessageBox.Show(
-                         "Rule " + rule.Name + " or program path doesn't exists.\nDelete this rule?", "Error",
-                         MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
-                    { removeRules.Add(rule); }
-                    continue;
-                }
-
-                var pbox = BuildPictureBox(lastY, rule);
-                lastY += pbox.Height + 5;
+                ProcessRule(rule, removeRules, ref lastY);
             }
 
             foreach (var ruleToDelete in removeRules)
             { ruleService.Delete(ruleToDelete.Id); }
         }
 
-        private PictureBox BuildPictureBox(int lastY, RuleDto rule)
+        private void ProcessRule(RuleDto rule, List<RuleDto> removeRules, ref int lastY)
         {
-            var icon = Icon.ExtractAssociatedIcon(rule.ProgramPath).ToBitmap();
-            var iconGrayScale = (Bitmap)ToolStripRenderer.CreateDisabledImage(icon);
-            DrawDirection(rule, icon);
-            DrawDirection(rule, iconGrayScale);
+            var matchingFwRules = firewallService.GetMatchingRules(rule.Name, rule.Profile, rule.Direction);
+            var matchingFwRulesCount = matchingFwRules.Count();
+            if (matchingFwRulesCount == 0)
+            { DeleteRule(rule, removeRules); }
+            else
+            {
+                FirewallRuleDto fwRule = null;
+                if (matchingFwRulesCount > 1)
+                {
+                    using (var selectRule = new SelectRule(rule, matchingFwRules))
+                    {
+                        if (selectRule.ShowDialog() == DialogResult.OK)
+                        { fwRule = selectRule.SelectedRule; }
+                    }
+                }
+                else
+                { fwRule = matchingFwRules.Single(); }
+
+                if (fwRule == null)
+                { DeleteRule(rule, removeRules); }
+                else
+                {
+                    var pbox = BuildPictureBox(lastY, rule, fwRule);
+                    lastY += pbox.Height + 5;
+                }
+            }
+        }
+
+        private static void DeleteRule(RuleDto rule, List<RuleDto> removeRules)
+        {
+            if (MessageBox.Show(
+                "Rule '" + rule.Name + "' could not be imported.\nDelete this rule?", "Error",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+            { removeRules.Add(rule); }
+        }
+
+        private PictureBox BuildPictureBox(int lastY, RuleDto rule, FirewallRuleDto fwRule)
+        {
+            Bitmap icon = null, iconGrayScale = null;
+            if (File.Exists(fwRule.ProgramPath))
+            {
+                icon = Icon.ExtractAssociatedIcon(fwRule.ProgramPath).ToBitmap();
+                iconGrayScale = (Bitmap)ToolStripRenderer.CreateDisabledImage(icon);
+                DrawDirection(fwRule.Direction, icon);
+                DrawDirection(fwRule.Direction, iconGrayScale);
+            }
+            else
+            { icon = iconGrayScale = CreateDefaultRuleIcon(); }
 
 
             var pbox = new PictureBox
             {
                 Location = new Point(5, lastY),
-                Image = firewallService.IsEnabled(rule.Name, rule.Profile, rule.Direction)
+                Image = firewallService.IsEnabled(fwRule)
                     ? icon
                     : iconGrayScale,
                 Size = icon.Size,
                 Cursor = Cursors.Hand,
             };
-            ruleNameToolTip.SetToolTip(pbox, rule.Name);
+            ruleNameToolTip.SetToolTip(pbox, fwRule.Name);
             pbox.Click += (sender, e) =>
             {
                 try
                 {
-                    var enabled = firewallService.SwitchEnabled(rule.Name, rule.Profile, rule.Direction);
+                    var enabled = firewallService.SwitchEnabled(fwRule);
                     pbox.Image = enabled ? icon : iconGrayScale;
                 }
                 catch (Exception exc)
@@ -93,9 +127,21 @@ namespace FirewallWidget.Presentation
             return pbox;
         }
 
-        private void DrawDirection(RuleDto rule, Bitmap icon)
+        private static Bitmap CreateDefaultRuleIcon()
         {
-            var text = rule.Direction.ToString();
+            var icon = new Bitmap(32, 32);
+            var graphics = Graphics.FromImage(icon);
+            var rect = new RectangleF(0, 0, 32f, 32f);
+            graphics.FillEllipse(Brushes.Gray, rect);
+            graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(), new Point(32, 32));
+            graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(32, 0), new Point(0, 32));
+
+            return icon;
+        }
+
+        private void DrawDirection(RuleDirectionDto direction, Bitmap icon)
+        {
+            var text = direction.ToString();
             var font = new Font("Consolas", 9.5f, FontStyle.Regular, GraphicsUnit.Point);
             var graphics = Graphics.FromImage(icon);
             var textSize = graphics.MeasureString(text, font);
