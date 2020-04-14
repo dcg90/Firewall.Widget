@@ -91,7 +91,10 @@ namespace FirewallWidget.Presentation
                 DrawDirection(fwRule.Direction, iconGrayScale);
             }
             else
-            { icon = iconGrayScale = CreateDefaultRuleIcon(); }
+            {
+                icon = CreateDefaultRuleIcon(true);
+                iconGrayScale = CreateDefaultRuleIcon(false);
+            }
 
 
             var pbox = new PictureBox
@@ -127,12 +130,12 @@ namespace FirewallWidget.Presentation
             return pbox;
         }
 
-        private static Bitmap CreateDefaultRuleIcon()
+        private static Bitmap CreateDefaultRuleIcon(bool enabledRule)
         {
             var icon = new Bitmap(32, 32);
             var graphics = Graphics.FromImage(icon);
             var rect = new RectangleF(0, 0, 32f, 32f);
-            graphics.FillEllipse(Brushes.Gray, rect);
+            graphics.FillEllipse(enabledRule ? Brushes.DarkCyan : Brushes.Gray, rect);
             graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(), new Point(32, 32));
             graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(32, 0), new Point(0, 32));
 
