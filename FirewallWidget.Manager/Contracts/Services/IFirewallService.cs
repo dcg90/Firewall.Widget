@@ -14,6 +14,10 @@ namespace FirewallWidget.Manager.Contracts.Services
 
         bool SwitchEnabled(FirewallRuleDto rule);
 
+        bool OutboundConnectionsAllowedOn(ProfileDto profileDto);
+
+        void SwitchOutboundConnectionsStateOn(ProfileDto profileDto);
+
         void Refresh();
     }
 }

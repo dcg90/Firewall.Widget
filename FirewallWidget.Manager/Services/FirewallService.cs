@@ -21,6 +21,9 @@ namespace FirewallWidget.Manager.Services
     public class FirewallService : IFirewallService
     {
         private static ICollection<Group> groupedRules;
+        private static readonly INetFwPolicy2 firewallPolicy
+            = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+
 
         static FirewallService()
         {
@@ -104,7 +107,6 @@ namespace FirewallWidget.Manager.Services
 
         private static void LoadFirewallRules()
         {
-            var firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
             var rules = new List<INetFwRule3>();
 
             foreach (INetFwRule3 r in firewallPolicy.Rules)
@@ -150,6 +152,26 @@ namespace FirewallWidget.Manager.Services
 
             foreach (var group in groupedRules)
             { group.Rules = group.Rules.OrderBy(r => r.Name); }
+        }
+
+        public bool OutboundConnectionsAllowedOn(ProfileDto profileDto)
+        {
+
+            var profile = (NET_FW_PROFILE_TYPE2_)profileDto;
+            var action = firewallPolicy.get_DefaultOutboundAction(profile);
+
+            return action == NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
+        }
+
+        public void SwitchOutboundConnectionsStateOn(ProfileDto profileDto)
+        {
+            var allowedOutboundConnections = OutboundConnectionsAllowedOn(profileDto);
+            var profile = (NET_FW_PROFILE_TYPE2_)profileDto;
+            firewallPolicy.set_DefaultOutboundAction(
+                profile,
+                allowedOutboundConnections
+                    ? NET_FW_ACTION_.NET_FW_ACTION_BLOCK
+                    : NET_FW_ACTION_.NET_FW_ACTION_ALLOW);
         }
     }
 }

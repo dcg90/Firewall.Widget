@@ -1,10 +1,14 @@
-﻿namespace FirewallWidget.Manager.DTO
+﻿using System.Drawing;
+
+namespace FirewallWidget.Manager.DTO
 {
     public class RuleDto
     {
         public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public Bitmap Icon { get; set; }
 
         public string ProgramPath { get; set; }
 

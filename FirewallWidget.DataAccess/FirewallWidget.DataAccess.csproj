@@ -66,6 +66,10 @@
     <Compile Include="Migrations\202004120002584_add-rule-direction.designer.cs">
       <DependentUpon>202004120002584_add-rule-direction.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202005121407573_add-icon-data.cs" />
+    <Compile Include="Migrations\202005121407573_add-icon-data.designer.cs">
+      <DependentUpon>202005121407573_add-icon-data.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\EF\BaseRepository.cs" />
@@ -90,6 +94,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202004120002584_add-rule-direction.resx">
       <DependentUpon>202004120002584_add-rule-direction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202005121407573_add-icon-data.resx">
+      <DependentUpon>202005121407573_add-icon-data.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
