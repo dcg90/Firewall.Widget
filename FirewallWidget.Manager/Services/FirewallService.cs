@@ -20,34 +20,14 @@ namespace FirewallWidget.Manager.Services
 
     public class FirewallService : IFirewallService
     {
-        private static readonly IEnumerable<Group> groupedRules;
+        private static ICollection<Group> groupedRules;
+        private static readonly INetFwPolicy2 firewallPolicy
+            = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
+
 
         static FirewallService()
         {
-            var firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-            var rules = new List<FirewallRuleDto>();
-
-            foreach (INetFwRule3 r in firewallPolicy.Rules)
-            {
-                rules.Add(new FirewallRuleDto
-                {
-                    Profile = (ProfileDto)r.Profiles,
-                    Name = r.Name,
-                    ProgramPath = r.ApplicationName,
-                    Direction = (RuleDirectionDto)r.Direction,
-                    FwRule = r
-                });
-            }
-
-            groupedRules = from r in rules
-                           orderby r.Name
-                           group r by new { r.Profile, r.Direction } into g
-                           select new Group
-                           {
-                               Profile = g.Key.Profile,
-                               Direction = g.Key.Direction,
-                               Rules = g
-                           };
+            LoadFirewallRules();
         }
 
         public IEnumerable<FirewallRuleDto> GetRules(ProfileDto profile, RuleDirectionDto direction)
@@ -61,45 +41,137 @@ namespace FirewallWidget.Manager.Services
             return Enumerable.Empty<FirewallRuleDto>();
         }
 
-        public bool IsEnabled(string name, ProfileDto profile, RuleDirectionDto direction)
+        public bool IsEnabled(FirewallRuleDto rule)
         {
-            if (TryGetRule(name, profile, direction, out var rule))
-            { return rule.FwRule.Enabled; }
+            var fwRule = ExtractFwRule(rule);
+            if (fwRule != null)
+            { return fwRule.Enabled; }
 
-            throw new InvalidOperationException("Rule " + name + " doesn't exists.");
+            throw DontExistOrSeveralFound(rule);
         }
 
-        public bool Exists(string name, ProfileDto profile, RuleDirectionDto direction)
+
+        public IEnumerable<FirewallRuleDto> GetMatchingRules(
+            string name, ProfileDto profile, RuleDirectionDto direction)
         {
-            return TryGetRule(name, profile, direction, out var _);
+            TryGetRules(name, profile, direction, out var rules);
+            return rules;
         }
 
-        public bool SwitchEnabled(string name, ProfileDto profile, RuleDirectionDto direction)
+        public bool SwitchEnabled(FirewallRuleDto rule)
         {
-            if (TryGetRule(name, profile, direction, out var rule))
+            var fwRule = ExtractFwRule(rule);
+            if (fwRule != null)
             {
-                rule.FwRule.Enabled = !rule.FwRule.Enabled;
-                return rule.FwRule.Enabled;
+                fwRule.Enabled = !fwRule.Enabled;
+                return fwRule.Enabled;
             }
 
-            throw new InvalidOperationException("Rule " + name + " doesn't exists.");
+            throw DontExistOrSeveralFound(rule);
+
         }
 
-        private bool TryGetRule(string name, ProfileDto profile, RuleDirectionDto direction, out FirewallRuleDto rule)
+        public void Refresh()
         {
-            rule = null;
+            LoadFirewallRules();
+        }
 
-            foreach (var r in GetRules(profile, direction))
+        private INetFwRule3 ExtractFwRule(FirewallRuleDto rule)
+        {
+            if (rule != null)
             {
-                if (r.Name == name)
+                if (rule.FwRule != null)
+                { return rule.FwRule; }
+
+                if (TryGetRules(rule.Name, rule.Profile, rule.Direction, out var rules) && rules.Count() == 1)
+                { return rules.Single().FwRule; }
+            }
+
+            return null;
+        }
+
+        private static InvalidOperationException DontExistOrSeveralFound(FirewallRuleDto rule)
+        {
+            return new InvalidOperationException("Rule " + rule?.Name + " doesn't exists.");
+        }
+
+        private bool TryGetRules(
+            string name, ProfileDto profile, RuleDirectionDto direction,
+            out IEnumerable<FirewallRuleDto> matchingRules)
+        {
+            matchingRules = GetRules(profile, direction)
+                .Where(r => r.Name == name);
+
+            return matchingRules.Count() > 0;
+        }
+
+        private static void LoadFirewallRules()
+        {
+            var rules = new List<INetFwRule3>();
+
+            foreach (INetFwRule3 r in firewallPolicy.Rules)
+            { rules.Add(r); }
+
+            var allGroups = from r in rules
+                            orderby r.Name
+                            group r by new { r.Profiles, r.Direction } into g
+                            select new { g.Key.Profiles, g.Key.Direction, Rules = g };
+
+            groupedRules = new List<Group>();
+
+            foreach (var group in allGroups)
+            {
+                foreach (int profile in Enum.GetValues(typeof(ProfileDto)))
                 {
-                    rule = r;
-                    return true;
+                    if ((profile & group.Profiles) == profile)
+                    {
+                        var g = groupedRules.FirstOrDefault(
+                            gi => (int)gi.Profile == profile &&
+                                  gi.Direction == (RuleDirectionDto)group.Direction);
+                        if (g == null)
+                        {
+                            g = new Group
+                            {
+                                Direction = (RuleDirectionDto)group.Direction,
+                                Profile = (ProfileDto)profile,
+                                Rules = Enumerable.Empty<FirewallRuleDto>()
+                            };
+                            groupedRules.Add(g);
+                        }
+                        g.Rules = g.Rules.Concat(group.Rules.Select(ri => new FirewallRuleDto
+                        {
+                            Direction = (RuleDirectionDto)group.Direction,
+                            Name = ri.Name,
+                            Profile = (ProfileDto)profile,
+                            ProgramPath = ri.ApplicationName,
+                            FwRule = ri
+                        }));
+                    }
                 }
             }
 
-            return false;
+            foreach (var group in groupedRules)
+            { group.Rules = group.Rules.OrderBy(r => r.Name); }
         }
 
+        public bool OutboundConnectionsAllowedOn(ProfileDto profileDto)
+        {
+
+            var profile = (NET_FW_PROFILE_TYPE2_)profileDto;
+            var action = firewallPolicy.get_DefaultOutboundAction(profile);
+
+            return action == NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
+        }
+
+        public void SwitchOutboundConnectionsStateOn(ProfileDto profileDto)
+        {
+            var allowedOutboundConnections = OutboundConnectionsAllowedOn(profileDto);
+            var profile = (NET_FW_PROFILE_TYPE2_)profileDto;
+            firewallPolicy.set_DefaultOutboundAction(
+                profile,
+                allowedOutboundConnections
+                    ? NET_FW_ACTION_.NET_FW_ACTION_BLOCK
+                    : NET_FW_ACTION_.NET_FW_ACTION_ALLOW);
+        }
     }
 }

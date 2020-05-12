@@ -107,6 +107,15 @@
     <Compile Include="ChildForms\AddRulesForm.Designer.cs">
       <DependentUpon>AddRulesForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ChildForms\DirectionItem.cs" />
+    <Compile Include="ChildForms\ProfileItem.cs" />
+    <Compile Include="ChildForms\RuleItem.cs" />
+    <Compile Include="ChildForms\SelectRule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChildForms\SelectRule.Designer.cs">
+      <DependentUpon>SelectRule.cs</DependentUpon>
+    </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -117,6 +126,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ChildForms\AddRulesForm.resx">
       <DependentUpon>AddRulesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChildForms\SelectRule.resx">
+      <DependentUpon>SelectRule.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

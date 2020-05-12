@@ -8,10 +8,16 @@ namespace FirewallWidget.Manager.Contracts.Services
     {
         IEnumerable<FirewallRuleDto> GetRules(ProfileDto profile, RuleDirectionDto direction);
 
-        bool IsEnabled(string name, ProfileDto profile, RuleDirectionDto direction);
+        bool IsEnabled(FirewallRuleDto rule);
 
-        bool Exists(string name, ProfileDto profile, RuleDirectionDto direction);
+        IEnumerable<FirewallRuleDto> GetMatchingRules(string name, ProfileDto profile, RuleDirectionDto direction);
 
-        bool SwitchEnabled(string name, ProfileDto profile, RuleDirectionDto direction);
+        bool SwitchEnabled(FirewallRuleDto rule);
+
+        bool OutboundConnectionsAllowedOn(ProfileDto profileDto);
+
+        void SwitchOutboundConnectionsStateOn(ProfileDto profileDto);
+
+        void Refresh();
     }
 }

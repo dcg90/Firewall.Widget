@@ -28,15 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.cboxProfiles = new System.Windows.Forms.ComboBox();
             this.lboxRules = new System.Windows.Forms.ListBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btnRefreshRules = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
             this.cboxDirections = new System.Windows.Forms.ComboBox();
             this.btnOk = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.infoToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -66,12 +69,29 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.btnRefreshRules);
             this.panel2.Controls.Add(this.btnClose);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(358, 23);
             this.panel2.TabIndex = 3;
+            // 
+            // btnRefreshRules
+            // 
+            this.btnRefreshRules.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
+            this.btnRefreshRules.Cursor = System.Windows.Forms.Cursors.Default;
+            this.btnRefreshRules.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnRefreshRules.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
+            this.btnRefreshRules.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRefreshRules.Location = new System.Drawing.Point(0, 0);
+            this.btnRefreshRules.Name = "btnRefreshRules";
+            this.btnRefreshRules.Size = new System.Drawing.Size(88, 21);
+            this.btnRefreshRules.TabIndex = 1;
+            this.btnRefreshRules.Text = "Refresh List";
+            this.infoToolTip.SetToolTip(this.btnRefreshRules, "Refresh only when needed. This action may increase the RAM usage.");
+            this.btnRefreshRules.UseVisualStyleBackColor = false;
+            this.btnRefreshRules.Click += new System.EventHandler(this.BtnRefreshRules_Click);
             // 
             // btnClose
             // 
@@ -138,6 +158,12 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "Profile";
             // 
+            // infoToolTip
+            // 
+            this.infoToolTip.AutoPopDelay = 10000;
+            this.infoToolTip.InitialDelay = 500;
+            this.infoToolTip.ReshowDelay = 100;
+            // 
             // AddRulesForm
             // 
             this.AcceptButton = this.btnOk;
@@ -169,5 +195,7 @@
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cboxDirections;
+        private System.Windows.Forms.Button btnRefreshRules;
+        private System.Windows.Forms.ToolTip infoToolTip;
     }
 }

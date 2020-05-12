@@ -6,6 +6,8 @@
 
         public string Name { get; set; }
 
+        public byte[] Icon { get; set; }
+
         public string ProgramPath { get; set; }
 
         public int Profile { get; set; }

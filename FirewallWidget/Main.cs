@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace FirewallWidget.Presentation
@@ -24,6 +25,16 @@ namespace FirewallWidget.Presentation
 
             InitializeComponent();
             LoadRules();
+
+            SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
+        }
+
+        private void SetOutBoundConnectionState(ToolStripMenuItem item, ProfileDto profile)
+        {
+            item.CheckState =
+                firewallService.OutboundConnectionsAllowedOn(profile)
+                ? CheckState.Checked
+                : CheckState.Unchecked;
         }
 
         private void LoadRules()
@@ -34,48 +45,72 @@ namespace FirewallWidget.Presentation
 
             foreach (var rule in ruleService.ReadAll())
             {
-                if (!firewallService.Exists(rule.Name, rule.Profile, rule.Direction) ||
-                    !File.Exists(rule.ProgramPath))
-                {
-                    if (MessageBox.Show(
-                         "Rule " + rule.Name + " or program path doesn't exists.\nDelete this rule?", "Error",
-                         MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
-                    { removeRules.Add(rule); }
-                    continue;
-                }
-
-                var pbox = BuildPictureBox(lastY, rule);
-                lastY += pbox.Height + 5;
+                ProcessRule(rule, removeRules, ref lastY);
             }
 
             foreach (var ruleToDelete in removeRules)
             { ruleService.Delete(ruleToDelete.Id); }
         }
 
-        private PictureBox BuildPictureBox(int lastY, RuleDto rule)
+        private void ProcessRule(RuleDto rule, List<RuleDto> removeRules, ref int lastY)
         {
-            var icon = Icon.ExtractAssociatedIcon(rule.ProgramPath).ToBitmap();
-            var iconGrayScale = (Bitmap)ToolStripRenderer.CreateDisabledImage(icon);
-            DrawDirection(rule, icon);
-            DrawDirection(rule, iconGrayScale);
+            var matchingFwRules = firewallService.GetMatchingRules(rule.Name, rule.Profile, rule.Direction);
+            var matchingFwRulesCount = matchingFwRules.Count();
+            if (matchingFwRulesCount == 0)
+            { DeleteRule(rule, removeRules); }
+            else
+            {
+                FirewallRuleDto fwRule = null;
+                if (matchingFwRulesCount > 1)
+                {
+                    using (var selectRule = new SelectRule(rule, matchingFwRules))
+                    {
+                        if (selectRule.ShowDialog() == DialogResult.OK)
+                        { fwRule = selectRule.SelectedRule; }
+                    }
+                }
+                else
+                { fwRule = matchingFwRules.Single(); }
+
+                if (fwRule == null)
+                { DeleteRule(rule, removeRules); }
+                else
+                {
+                    var pbox = BuildPictureBox(lastY, rule, fwRule);
+                    lastY += pbox.Height + 5;
+                }
+            }
+        }
+
+        private static void DeleteRule(RuleDto rule, List<RuleDto> removeRules)
+        {
+            if (MessageBox.Show(
+                "Rule '" + rule.Name + "' could not be imported.\nDelete this rule?", "Error",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+            { removeRules.Add(rule); }
+        }
+
+        private PictureBox BuildPictureBox(int lastY, RuleDto rule, FirewallRuleDto fwRule)
+        {
+            var (icon, iconGrayScale) = LoadRuleIcon(rule, fwRule);
 
 
             var pbox = new PictureBox
             {
                 Location = new Point(5, lastY),
-                Image = firewallService.IsEnabled(rule.Name, rule.Profile, rule.Direction)
+                Image = firewallService.IsEnabled(fwRule)
                     ? icon
                     : iconGrayScale,
-                Size = icon.Size,
+                Size = new Size(32, 32),
                 Cursor = Cursors.Hand,
+                Tag = rule
             };
-            var toolTip = new ToolTip();
-            toolTip.SetToolTip(pbox, rule.Name);
+            ruleNameToolTip.SetToolTip(pbox, fwRule.Name);
             pbox.Click += (sender, e) =>
             {
                 try
                 {
-                    var enabled = firewallService.SwitchEnabled(rule.Name, rule.Profile, rule.Direction);
+                    var enabled = firewallService.SwitchEnabled(fwRule);
                     pbox.Image = enabled ? icon : iconGrayScale;
                 }
                 catch (Exception exc)
@@ -89,14 +124,56 @@ namespace FirewallWidget.Presentation
                     }
                 }
             };
+            pbox.ContextMenuStrip = pboxContext;
             pbox.MouseLeave += HideForm;
             pnlRules.Controls.Add(pbox);
             return pbox;
         }
 
-        private void DrawDirection(RuleDto rule, Bitmap icon)
+        private (Bitmap, Bitmap) LoadRuleIcon(RuleDto rule, FirewallRuleDto fwRule)
         {
-            var text = rule.Direction.ToString();
+            Bitmap iconGrayScale;
+            Bitmap icon;
+
+            if (rule.Icon != null)
+            { (icon, iconGrayScale) = (rule.Icon, (Bitmap)ToolStripRenderer.CreateDisabledImage(rule.Icon)); }
+            else if (File.Exists(fwRule.ProgramPath))
+            {
+                icon = GetExeIcon(fwRule.ProgramPath);
+                iconGrayScale = (Bitmap)ToolStripRenderer.CreateDisabledImage(icon);
+            }
+            else
+            {
+                icon = CreateDefaultRuleIcon(true);
+                iconGrayScale = CreateDefaultRuleIcon(false);
+            }
+
+            DrawDirection(fwRule.Direction, icon);
+            DrawDirection(fwRule.Direction, iconGrayScale);
+
+            return (icon, iconGrayScale);
+        }
+
+        private static Bitmap GetExeIcon(string filename)
+        {
+            return Icon.ExtractAssociatedIcon(filename).ToBitmap();
+        }
+
+        private static Bitmap CreateDefaultRuleIcon(bool enabledRule)
+        {
+            var icon = new Bitmap(32, 32);
+            var graphics = Graphics.FromImage(icon);
+            var rect = new RectangleF(0, 0, 32f, 32f);
+            graphics.FillEllipse(enabledRule ? Brushes.DarkCyan : Brushes.Gray, rect);
+            graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(), new Point(32, 32));
+            graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(32, 0), new Point(0, 32));
+
+            return icon;
+        }
+
+        private void DrawDirection(RuleDirectionDto direction, Bitmap icon)
+        {
+            var text = direction.ToString();
             var font = new Font("Consolas", 9.5f, FontStyle.Regular, GraphicsUnit.Point);
             var graphics = Graphics.FromImage(icon);
             var textSize = graphics.MeasureString(text, font);
@@ -196,6 +273,97 @@ namespace FirewallWidget.Presentation
         private void OptionsMenu_Closed(object sender, ToolStripDropDownClosedEventArgs e)
         {
             HideForm();
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var @params = base.CreateParams;
+                @params.ExStyle |= 0x80;
+                return @params;
+            }
+        }
+
+        private static PictureBox GetPBoxFromSender(object sender)
+        { return ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl as PictureBox; }
+
+        private void SetIconToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (GetPBoxFromSender(sender) is PictureBox pbox)
+            {
+                var ofd = new OpenFileDialog()
+                {
+                    AddExtension = true,
+                    CheckFileExists = true,
+                    CheckPathExists = true,
+                    Filter = "Icon File (*.ico)|*.ico|Executable (*.exe)|*.exe",
+                    Multiselect = false,
+                    Title = "Select file to get icon"
+                };
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    if (pbox.Tag is RuleDto ruleDto)
+                    {
+                        ruleDto.Icon = Path.GetExtension(ofd.FileName) == ".exe"
+                            ? GetExeIcon(ofd.FileName)
+                            : new Icon(ofd.FileName).ToBitmap();
+
+                        ruleService.Update(ruleDto);
+                        LoadRules();
+                    }
+
+                }
+            }
+            HideForm();
+        }
+
+        private void PboxContext_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+            if (sender is ContextMenuStrip menu &&
+                menu.SourceControl is PictureBox pbox &&
+                pbox.Tag is RuleDto ruleDto)
+            {
+                removeIconToolStripMenuItem.Enabled = ruleDto.Icon != null;
+            }
+        }
+
+        private void RemoveRuleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (GetPBoxFromSender(sender) is PictureBox pbox &&
+                pbox.Tag is RuleDto ruleDto)
+            {
+                ruleService.Delete(ruleDto.Id);
+                LoadRules();
+            }
+
+            HideForm();
+        }
+
+        private void RemoveIconToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (GetPBoxFromSender(sender) is PictureBox pbox &&
+                pbox.Tag is RuleDto ruleDto)
+            {
+                ruleDto.Icon = null;
+                ruleService.Update(ruleDto);
+                LoadRules();
+            }
+
+            HideForm();
+        }
+
+        private void PboxContext_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+        {
+            HideForm();
+        }
+
+        private void PublicAllowOutboundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            firewallService.SwitchOutboundConnectionsStateOn(ProfileDto.Public);
+            SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
         }
     }
 }

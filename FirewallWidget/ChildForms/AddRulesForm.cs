@@ -92,39 +92,11 @@ namespace FirewallWidget.ChildForms
             }
 
         }
-    }
 
-    internal class RuleItem
-    {
-        public FirewallRuleDto Rule { get; set; }
-
-        public override string ToString()
+        private void BtnRefreshRules_Click(object sender, EventArgs e)
         {
-            return (Rule?.Name ?? "<empty>") + " (" + (Rule?.ProgramPath ?? "<empty>") + ")";
-        }
-    }
-
-    internal class ProfileItem
-    {
-        public string Display { get; set; }
-
-        public ProfileDto Profile { get; set; }
-
-        public override string ToString()
-        {
-            return Display;
-        }
-    }
-
-    internal class DirectionItem
-    {
-        public string Display { get; set; }
-
-        public RuleDirectionDto Direction { get; set; }
-
-        public override string ToString()
-        {
-            return Display;
+            firewallService.Refresh();
+            LoadRules();
         }
     }
 }
