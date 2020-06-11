@@ -1,7 +1,7 @@
 ﻿using FirewallWidget.ChildForms;
 using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
-using FirewallWidget.Properties;
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;

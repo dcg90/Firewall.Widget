@@ -2,6 +2,7 @@
 using AutoMapper;
 
 using FirewallWidget.DataAccess.Contexts;
+using FirewallWidget.DataAccess.Contracts.Context;
 using FirewallWidget.Manager.Extensions;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,7 @@ namespace FirewallWidget.Manager
         {
             services
                 .AddAutoMapper(Assembly.GetExecutingAssembly())
-                .AddScoped<EFDbContext>()
+                .AddScoped<IEFDbContext, SQLiteDbContext>()
                 .ConfigureRepositories()
                 .ConfigureServices();
         }

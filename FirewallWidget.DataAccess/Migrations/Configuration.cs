@@ -2,7 +2,7 @@
 {
     using System.Data.Entity.Migrations;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<FirewallWidget.DataAccess.Contexts.EFDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<FirewallWidget.DataAccess.Contexts.SQLServerDbContext>
     {
         public Configuration()
         {
@@ -10,7 +10,7 @@
             ContextKey = "FirewallWidget.DataAccess.Contexts.EFDbContext";
         }
 
-        protected override void Seed(FirewallWidget.DataAccess.Contexts.EFDbContext context)
+        protected override void Seed(FirewallWidget.DataAccess.Contexts.SQLServerDbContext context)
         {
             //  This method will be called after migrating to the latest version.
 
