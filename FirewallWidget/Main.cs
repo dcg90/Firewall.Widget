@@ -26,11 +26,25 @@ namespace FirewallWidget.Presentation
 
 
             InitializeComponent();
+            MyInitializeComponent();
+
             LoadRules();
 
             SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
             pnlRules.AutoScrollPosition = new Point(0, 0);
             pnlScrollUp.Disable();
+        }
+
+        private void MyInitializeComponent()
+        {
+            pnlRules.VerticalScroll.Visible = false;
+            pnlRules.MouseWheel += (sender, e) =>
+            {
+                if (e.Delta < 0)
+                { ScrollRulesDown(); }
+                else if (e.Delta > 0)
+                { ScrollRulesUp(); }
+            };
         }
 
         private void SetOutBoundConnectionState(ToolStripMenuItem item, ProfileDto profile)
@@ -269,6 +283,55 @@ namespace FirewallWidget.Presentation
             { pnlScrollDown.Enable(); }
             else
             { pnlScrollDown.Disable(); }
+        }
+
+        private void ScrollRulesUp()
+        {
+            if (!canScrollRulesUp)
+            { return; }
+
+            var p = scrollRulesPosition;
+            scrollRulesPosition = Math.Max(0, scrollRulesPosition - 37);
+
+            if (p != scrollRulesPosition)
+            {
+                if (scrollRulesPosition <= 0)
+                {
+                    pnlRules.AutoScrollPosition = new Point(0, 0);
+                    canScrollRulesUp = false;
+                    pnlScrollUp.Disable();
+                }
+                else
+                { pnlRules.VerticalScroll.Value = scrollRulesPosition; }
+
+                canScrollRulesDown = true;
+                pnlScrollDown.Enable();
+            }
+        }
+
+        private void ScrollRulesDown()
+        {
+            if (!canScrollRulesDown)
+            { return; }
+
+            var p = scrollRulesPosition;
+            scrollRulesPosition = Math.Min(
+                pnlRules.VerticalScroll.Maximum, scrollRulesPosition + 37);
+
+            if (p != scrollRulesPosition)
+            {
+                if (scrollRulesPosition >= pnlRules.VerticalScroll.Maximum)
+                {
+                    pnlRules.AutoScrollPosition = new Point(0, pnlRules.VerticalScroll.Maximum);
+                    canScrollRulesDown = false;
+                    pnlScrollDown.Disable();
+                }
+                else
+                { pnlRules.VerticalScroll.Value = scrollRulesPosition; }
+
+                pnlScrollUp.Enable();
+                canScrollRulesUp = true;
+            }
         }
     }
 }

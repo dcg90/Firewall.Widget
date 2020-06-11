@@ -177,7 +177,7 @@
             this.pnlScrollDown.Size = new System.Drawing.Size(80, 9);
             this.pnlScrollDown.TabIndex = 4;
             this.pnlScrollDown.Tag = "ScrollDown";
-            this.pnlScrollDown.Click += new System.EventHandler(this.ScrollRulesDown);
+            this.pnlScrollDown.Click += new System.EventHandler(this.ScrollRulesDownHandler);
             this.pnlScrollDown.MouseEnter += new System.EventHandler(this.ShowForm);
             this.pnlScrollDown.MouseLeave += new System.EventHandler(this.HideForm);
             // 
@@ -193,7 +193,7 @@
             this.pnlScrollUp.Size = new System.Drawing.Size(80, 9);
             this.pnlScrollUp.TabIndex = 2;
             this.pnlScrollUp.Tag = "ScrollUp";
-            this.pnlScrollUp.Click += new System.EventHandler(this.ScrollRulesUp);
+            this.pnlScrollUp.Click += new System.EventHandler(this.ScrollRulesUpHandler);
             this.pnlScrollUp.MouseEnter += new System.EventHandler(this.ShowForm);
             this.pnlScrollUp.MouseLeave += new System.EventHandler(this.HideForm);
             // 

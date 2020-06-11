@@ -132,53 +132,14 @@ namespace FirewallWidget.Presentation
             SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
         }
 
-        private void ScrollRulesUp(object sender, EventArgs e)
+        private void ScrollRulesUpHandler(object sender, EventArgs e)
         {
-            if (!canScrollRulesUp)
-            { return; }
-
-            var p = scrollRulesPosition;
-            scrollRulesPosition = Math.Max(0, scrollRulesPosition - 37);
-
-            if (p != scrollRulesPosition)
-            {
-                if (scrollRulesPosition <= 0)
-                {
-                    pnlRules.AutoScrollPosition = new Point(0, 0);
-                    canScrollRulesUp = false;
-                    pnlScrollUp.Disable();
-                }
-                else
-                { pnlRules.VerticalScroll.Value = scrollRulesPosition; }
-
-                canScrollRulesDown = true;
-                pnlScrollDown.Enable();
-            }
+            ScrollRulesUp();
         }
 
-        private void ScrollRulesDown(object sender, EventArgs e)
+        private void ScrollRulesDownHandler(object sender, EventArgs e)
         {
-            if (!canScrollRulesDown)
-            { return; }
-
-            var p = scrollRulesPosition;
-            scrollRulesPosition = Math.Min(
-                pnlRules.VerticalScroll.Maximum, scrollRulesPosition + 37);
-
-            if (p != scrollRulesPosition)
-            {
-                if (scrollRulesPosition >= pnlRules.VerticalScroll.Maximum)
-                {
-                    pnlRules.AutoScrollPosition = new Point(0, pnlRules.VerticalScroll.Maximum);
-                    canScrollRulesDown = false;
-                    pnlScrollDown.Disable();
-                }
-                else
-                { pnlRules.VerticalScroll.Value = scrollRulesPosition; }
-
-                pnlScrollUp.Enable();
-                canScrollRulesUp = true;
-            }
+            ScrollRulesDown();
         }
     }
 }
