@@ -156,6 +156,7 @@
             // 
             // pnlRules
             // 
+            this.pnlRules.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlRules.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlRules.Location = new System.Drawing.Point(0, 17);
             this.pnlRules.Name = "pnlRules";

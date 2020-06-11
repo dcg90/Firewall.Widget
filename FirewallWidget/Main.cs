@@ -43,7 +43,7 @@ namespace FirewallWidget.Presentation
 
         private void LoadRules()
         {
-            var lastY = 10;
+            var lastY = 5;
             var removeRules = new List<RuleDto>();
             pnlRules.Controls.Clear();
 
@@ -55,7 +55,7 @@ namespace FirewallWidget.Presentation
             foreach (var ruleToDelete in removeRules)
             { ruleService.Delete(ruleToDelete.Id); }
 
-            CalcRulesMaxScroll();
+            ResetRulesScroll();
         }
 
         private void ProcessRule(RuleDto rule, List<RuleDto> removeRules, ref int lastY)
@@ -250,14 +250,25 @@ namespace FirewallWidget.Presentation
 
         private static PictureBox GetPBoxFromSender(object sender)
         { return ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl as PictureBox; }
-        
-        private void CalcRulesMaxScroll()
+
+        private void ResetRulesScroll()
         {
             pnlRules.VerticalScroll.Maximum = Math.Max(0, pnlRules.Controls.Count > 0
-                 ? pnlRules.Controls.OfType<Control>().Max(c => c.Location.Y + c.Height) - pnlRules.Height
+                 ? pnlRules.Controls.OfType<Control>().Max(c => c.Location.Y + c.Height + 5) - pnlRules.Height
                  : 0);
+            if (pnlRules.VerticalScroll.Maximum > 0)
+            { pnlRules.VerticalScroll.Maximum = Math.Max(pnlRules.VerticalScroll.Maximum, 38); }
+
+            pnlRules.AutoScrollPosition = new Point(0, 0);
+            scrollRulesPosition = 0;
+            pnlScrollUp.Disable();
+            canScrollRulesUp = false;
 
             canScrollRulesDown = pnlRules.VerticalScroll.Maximum > 0;
+            if (canScrollRulesDown)
+            { pnlScrollDown.Enable(); }
+            else
+            { pnlScrollDown.Disable(); }
         }
     }
 }
