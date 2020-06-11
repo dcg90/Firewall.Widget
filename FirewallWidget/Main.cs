@@ -1,7 +1,7 @@
 ﻿using FirewallWidget.ChildForms;
 using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
-
+using FirewallWidget.Properties;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -16,6 +16,8 @@ namespace FirewallWidget.Presentation
     {
         private readonly IFirewallService firewallService;
         private readonly IRuleService ruleService;
+        private int scrollRulesPosition = 0;
+        private bool canScrollRulesDown, canScrollRulesUp;
 
         public MainForm(IFirewallService firewallService, IRuleService ruleService)
         {
@@ -27,6 +29,8 @@ namespace FirewallWidget.Presentation
             LoadRules();
 
             SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
+            pnlRules.AutoScrollPosition = new Point(0, 0);
+            pnlScrollUp.Disable();
         }
 
         private void SetOutBoundConnectionState(ToolStripMenuItem item, ProfileDto profile)
@@ -50,6 +54,8 @@ namespace FirewallWidget.Presentation
 
             foreach (var ruleToDelete in removeRules)
             { ruleService.Delete(ruleToDelete.Id); }
+
+            CalcRulesMaxScroll();
         }
 
         private void ProcessRule(RuleDto rule, List<RuleDto> removeRules, ref int lastY)
@@ -221,58 +227,15 @@ namespace FirewallWidget.Presentation
             return path;
         }
 
-        private void BtnOptions_Click(object sender, System.EventArgs e)
-        {
-            optionsMenu.Show(Cursor.Position, ToolStripDropDownDirection.BelowRight);
-        }
-
-        private void ExitToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
-
-        private void AddRulesToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            ShowForm();
-            using (var addRulesForm = new AddRulesForm(this, firewallService))
-            {
-                if (addRulesForm.ShowDialog() == DialogResult.OK)
-                {
-                    ruleService.Create(addRulesForm.SelectedRules.ToArray());
-                    LoadRules();
-                }
-            }
-            HideForm();
-        }
-
-        private void ShowForm(object sender, EventArgs e)
-        { ShowForm(); }
-
         private void ShowForm()
         {
             Location = new Point(0, 0);
-        }
-
-        private void HideForm(object sender, EventArgs e)
-        {
-            HideForm();
         }
 
         private void HideForm()
         {
             if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
             { Location = new Point(-40, 0); }
-        }
-
-        private void MainForm_Shown(object sender, System.EventArgs e)
-        {
-            Size = new Size(42, Screen.PrimaryScreen.WorkingArea.Height);
-            Location = new Point(-40, 0);
-        }
-
-        private void OptionsMenu_Closed(object sender, ToolStripDropDownClosedEventArgs e)
-        {
-            HideForm();
         }
 
         protected override CreateParams CreateParams
@@ -287,83 +250,14 @@ namespace FirewallWidget.Presentation
 
         private static PictureBox GetPBoxFromSender(object sender)
         { return ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl as PictureBox; }
-
-        private void SetIconToolStripMenuItem_Click(object sender, EventArgs e)
+        
+        private void CalcRulesMaxScroll()
         {
-            if (GetPBoxFromSender(sender) is PictureBox pbox)
-            {
-                var ofd = new OpenFileDialog()
-                {
-                    AddExtension = true,
-                    CheckFileExists = true,
-                    CheckPathExists = true,
-                    Filter = "Icon File (*.ico)|*.ico|Executable (*.exe)|*.exe",
-                    Multiselect = false,
-                    Title = "Select file to get icon"
-                };
+            pnlRules.VerticalScroll.Maximum = Math.Max(0, pnlRules.Controls.Count > 0
+                 ? pnlRules.Controls.OfType<Control>().Max(c => c.Location.Y + c.Height) - pnlRules.Height
+                 : 0);
 
-                if (ofd.ShowDialog() == DialogResult.OK)
-                {
-                    if (pbox.Tag is RuleDto ruleDto)
-                    {
-                        ruleDto.Icon = Path.GetExtension(ofd.FileName) == ".exe"
-                            ? GetExeIcon(ofd.FileName)
-                            : new Icon(ofd.FileName).ToBitmap();
-
-                        ruleService.Update(ruleDto);
-                        LoadRules();
-                    }
-
-                }
-            }
-            HideForm();
-        }
-
-        private void PboxContext_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-
-            if (sender is ContextMenuStrip menu &&
-                menu.SourceControl is PictureBox pbox &&
-                pbox.Tag is RuleDto ruleDto)
-            {
-                removeIconToolStripMenuItem.Enabled = ruleDto.Icon != null;
-            }
-        }
-
-        private void RemoveRuleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (GetPBoxFromSender(sender) is PictureBox pbox &&
-                pbox.Tag is RuleDto ruleDto)
-            {
-                ruleService.Delete(ruleDto.Id);
-                LoadRules();
-            }
-
-            HideForm();
-        }
-
-        private void RemoveIconToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (GetPBoxFromSender(sender) is PictureBox pbox &&
-                pbox.Tag is RuleDto ruleDto)
-            {
-                ruleDto.Icon = null;
-                ruleService.Update(ruleDto);
-                LoadRules();
-            }
-
-            HideForm();
-        }
-
-        private void PboxContext_Closed(object sender, ToolStripDropDownClosedEventArgs e)
-        {
-            HideForm();
-        }
-
-        private void PublicAllowOutboundToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            firewallService.SwitchOutboundConnectionsStateOn(ProfileDto.Public);
-            SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
+            canScrollRulesDown = pnlRules.VerticalScroll.Maximum > 0;
         }
     }
 }
