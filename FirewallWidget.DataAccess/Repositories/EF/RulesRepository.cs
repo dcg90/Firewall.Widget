@@ -1,5 +1,5 @@
 ﻿using FirewallWidget.Data;
-using FirewallWidget.DataAccess.Contexts;
+using FirewallWidget.DataAccess.Contracts.Context;
 using FirewallWidget.DataAccess.Contracts.Repositories;
 
 using System.Linq;
@@ -10,7 +10,7 @@ namespace FirewallWidget.DataAccess.Repositories.EF
         : BaseRepository<Rule, int>,
         IRulesRepository
     {
-        public RulesRepository(EFDbContext dbContext)
+        public RulesRepository(IEFDbContext dbContext)
             : base(dbContext, dbContext.Rules)
         { }
 

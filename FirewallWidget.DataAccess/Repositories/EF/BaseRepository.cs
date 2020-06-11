@@ -1,6 +1,6 @@
 ﻿using FirewallWidget.DataAccess.Contexts;
 using FirewallWidget.DataAccess.Contracts;
-
+using FirewallWidget.DataAccess.Contracts.Context;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -13,10 +13,10 @@ namespace FirewallWidget.DataAccess.Repositories.EF
     public abstract class BaseRepository<TEntity, TKey> : IRepository<TEntity, TKey>
         where TEntity : class
     {
-        protected readonly EFDbContext dbContext;
+        protected readonly IEFDbContext dbContext;
         private readonly DbSet<TEntity> entities;
 
-        public BaseRepository(EFDbContext dbContext, DbSet<TEntity> entities)
+        public BaseRepository(IEFDbContext dbContext, DbSet<TEntity> entities)
         {
             this.dbContext = dbContext;
             this.entities = entities;
@@ -25,7 +25,7 @@ namespace FirewallWidget.DataAccess.Repositories.EF
         public virtual TEntity Create(TEntity entity)
         {
             var e = entities.Add(entity);
-            dbContext.SaveChanges();
+            dbContext.Context.SaveChanges();
 
             return e;
         }
@@ -36,7 +36,7 @@ namespace FirewallWidget.DataAccess.Repositories.EF
             if (e != null)
             {
                 entities.Remove(e);
-                dbContext.SaveChanges();
+                dbContext.Context.SaveChanges();
                 return primaryKey;
             }
             return default;
@@ -56,7 +56,7 @@ namespace FirewallWidget.DataAccess.Repositories.EF
         public virtual TEntity Update(TEntity entity)
         {
             entities.AddOrUpdate(entity);
-            dbContext.SaveChanges();
+            dbContext.Context.SaveChanges();
 
             return entity;
         }

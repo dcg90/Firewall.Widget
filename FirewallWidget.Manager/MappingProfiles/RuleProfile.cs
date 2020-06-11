@@ -2,6 +2,7 @@
 
 using FirewallWidget.Data;
 using FirewallWidget.Manager.DTO;
+
 using System.Drawing;
 using System.IO;
 
@@ -16,7 +17,7 @@ namespace FirewallWidget.Manager.MappingProfiles
             CreateMap<RuleDto, Rule>()
                 .ForMember(r => r.Icon, opts => opts.MapFrom((dto, r) =>
                 {
-                    return dto.Icon != null ? (byte[])converter.ConvertTo(dto.Icon, typeof(byte[])) : (byte[])null;
+                    return dto.Icon != null ? (byte[])converter.ConvertTo(dto.Icon, typeof(byte[])) : null;
                 }))
                 .ReverseMap()
                 .ForMember(r => r.Icon, opts => opts.MapFrom((r, dto) =>
