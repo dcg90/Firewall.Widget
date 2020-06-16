@@ -5,9 +5,9 @@ using System.Windows.Forms;
 
 namespace FirewallWidget.ChildForms
 {
-    public partial class SelectRule : Form
+    public partial class SelectRuleForm : Form
     {
-        public SelectRule(RuleDto rule, IEnumerable<FirewallRuleDto> rules)
+        public SelectRuleForm(RuleDto rule, IEnumerable<FirewallRuleDto> rules)
         {
             InitializeComponent();
 

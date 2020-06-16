@@ -128,11 +128,11 @@
     </Compile>
     <Compile Include="ChildForms\ProfileItem.cs" />
     <Compile Include="ChildForms\RuleItem.cs" />
-    <Compile Include="ChildForms\SelectRule.cs">
+    <Compile Include="ChildForms\SelectRuleForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ChildForms\SelectRule.Designer.cs">
-      <DependentUpon>SelectRule.cs</DependentUpon>
+    <Compile Include="ChildForms\SelectRuleForm.Designer.cs">
+      <DependentUpon>SelectRuleForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
@@ -155,8 +155,8 @@
     <EmbeddedResource Include="ChildForms\OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ChildForms\SelectRule.resx">
-      <DependentUpon>SelectRule.cs</DependentUpon>
+    <EmbeddedResource Include="ChildForms\SelectRuleForm.resx">
+      <DependentUpon>SelectRuleForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

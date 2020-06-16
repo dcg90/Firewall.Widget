@@ -1,6 +1,6 @@
 ﻿namespace FirewallWidget.ChildForms
 {
-    partial class SelectRule
+    partial class SelectRuleForm
     {
         /// <summary>
         /// Required designer variable.
@@ -37,9 +37,10 @@
             // lblHeader
             // 
             this.lblHeader.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblHeader.ForeColor = System.Drawing.Color.Red;
             this.lblHeader.Location = new System.Drawing.Point(2, 4);
             this.lblHeader.Name = "lblHeader";
-            this.lblHeader.Size = new System.Drawing.Size(474, 44);
+            this.lblHeader.Size = new System.Drawing.Size(553, 47);
             this.lblHeader.TabIndex = 1;
             this.lblHeader.Text = "Multiple matches were found for rule \"{2} ({0}:{1})\". Please select the correct r" +
     "ule.";
@@ -48,19 +49,20 @@
             // lboxChoices
             // 
             this.lboxChoices.Font = new System.Drawing.Font("Consolas", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lboxChoices.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(64)))), ((int)(((byte)(0)))));
             this.lboxChoices.FormattingEnabled = true;
             this.lboxChoices.ItemHeight = 15;
-            this.lboxChoices.Location = new System.Drawing.Point(2, 50);
+            this.lboxChoices.Location = new System.Drawing.Point(2, 54);
             this.lboxChoices.Name = "lboxChoices";
-            this.lboxChoices.Size = new System.Drawing.Size(474, 139);
+            this.lboxChoices.Size = new System.Drawing.Size(552, 139);
             this.lboxChoices.TabIndex = 2;
             // 
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(320, 190);
+            this.btnOk.Location = new System.Drawing.Point(372, 195);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 23);
+            this.btnOk.Size = new System.Drawing.Size(87, 25);
             this.btnOk.TabIndex = 3;
             this.btnOk.Text = "Select";
             this.btnOk.UseVisualStyleBackColor = true;
@@ -68,26 +70,27 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(401, 190);
+            this.btnCancel.Location = new System.Drawing.Point(467, 195);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.Size = new System.Drawing.Size(87, 25);
             this.btnCancel.TabIndex = 4;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
-            // SelectRule
+            // SelectRuleForm
             // 
             this.AcceptButton = this.btnOk;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(478, 214);
+            this.ClientSize = new System.Drawing.Size(557, 222);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lboxChoices);
             this.Controls.Add(this.lblHeader);
+            this.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Name = "SelectRule";
+            this.Name = "SelectRuleForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

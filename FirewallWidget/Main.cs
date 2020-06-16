@@ -87,7 +87,7 @@ namespace FirewallWidget.Presentation
                 FirewallRuleDto fwRule = null;
                 if (matchingFwRulesCount > 1)
                 {
-                    using (var selectRule = new SelectRule(rule, matchingFwRules))
+                    using (var selectRule = new SelectRuleForm(rule, matchingFwRules))
                     {
                         if (selectRule.ShowDialog() == DialogResult.OK)
                         { fwRule = selectRule.SelectedRule; }

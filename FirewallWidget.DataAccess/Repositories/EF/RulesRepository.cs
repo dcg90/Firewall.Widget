@@ -2,7 +2,10 @@
 using FirewallWidget.DataAccess.Contracts.Context;
 using FirewallWidget.DataAccess.Contracts.Repositories;
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace FirewallWidget.DataAccess.Repositories.EF
 {
@@ -14,13 +17,25 @@ namespace FirewallWidget.DataAccess.Repositories.EF
             : base(dbContext, dbContext.Context.Set<Rule>())
         { }
 
-        public bool RuleExist(string name)
+        public IEnumerable<Rule> Read(string name, int profile, int direction)
         {
-            var q = from r in Entities
-                    where r.Name == name
-                    select r;
+            return Entities
+                .Where(RuleNameProfileDirection(name, profile, direction));
+        }
 
-            return q.FirstOrDefault() != null;
+        public bool RuleExist(string name, int profile, int direction)
+        {
+            return Entities
+                .Where(RuleNameProfileDirection(name, profile, direction))
+                .FirstOrDefault() != null;
+        }
+
+        private static Expression<Func<Rule, bool>> RuleNameProfileDirection(
+            string name, int profile, int direction)
+        {
+            return (r) => r.Name == name &&
+                          r.Profile == profile &&
+                          r.Direction == direction;
         }
     }
 }
