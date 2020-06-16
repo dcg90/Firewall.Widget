@@ -2,6 +2,8 @@
 using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,18 +14,20 @@ using System.Windows.Forms;
 
 namespace FirewallWidget.Presentation
 {
-    public partial class MainForm : Form
+    public partial class MainForm : NoTaskBarAltTabForm
     {
+        public IServiceProvider Provider { get; }
+
         private readonly IFirewallService firewallService;
         private readonly IRuleService ruleService;
         private int scrollRulesPosition = 0;
         private bool canScrollRulesDown, canScrollRulesUp;
 
-        public MainForm(IFirewallService firewallService, IRuleService ruleService)
+        public MainForm(IServiceProvider provider)
         {
-            this.firewallService = firewallService;
-            this.ruleService = ruleService;
-
+            Provider = provider;
+            firewallService = Provider.GetRequiredService<IFirewallService>(); ;
+            ruleService = Provider.GetRequiredService<IRuleService>(); ;
 
             InitializeComponent();
             MyInitializeComponent();
@@ -252,16 +256,6 @@ namespace FirewallWidget.Presentation
             { Location = new Point(-40, 0); }
         }
 
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                var @params = base.CreateParams;
-                @params.ExStyle |= 0x80;
-                return @params;
-            }
-        }
-
         private static PictureBox GetPBoxFromSender(object sender)
         { return ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl as PictureBox; }
 
@@ -308,6 +302,7 @@ namespace FirewallWidget.Presentation
                 pnlScrollDown.Enable();
             }
         }
+
 
         private void ScrollRulesDown()
         {

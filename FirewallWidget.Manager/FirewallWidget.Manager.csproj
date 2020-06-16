@@ -90,17 +90,21 @@
   <ItemGroup>
     <Compile Include="Contracts\IManagerService.cs" />
     <Compile Include="Contracts\Services\IFirewallService.cs" />
+    <Compile Include="Contracts\Services\IOptionsService.cs" />
     <Compile Include="Contracts\Services\IRuleService.cs" />
     <Compile Include="DTO\FirewallRuleDto.cs" />
+    <Compile Include="DTO\OptionsDto.cs" />
     <Compile Include="DTO\ProfileDto.cs" />
     <Compile Include="DTO\RuleDirectionDto.cs" />
     <Compile Include="DTO\RuleDtos.cs" />
     <Compile Include="Extensions\ContainerExtensions.cs" />
     <Compile Include="Extensions\ValidatorExtensions.cs" />
+    <Compile Include="MappingProfiles\OptionsProfile.cs" />
     <Compile Include="MappingProfiles\RuleProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceResult.cs" />
     <Compile Include="Services\FirewallService.cs" />
+    <Compile Include="Services\OptionsService.cs" />
     <Compile Include="Services\RuleService.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Validators\RuleValidator.cs" />

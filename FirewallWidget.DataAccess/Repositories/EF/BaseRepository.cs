@@ -1,6 +1,6 @@
-﻿using FirewallWidget.DataAccess.Contexts;
-using FirewallWidget.DataAccess.Contracts;
+﻿using FirewallWidget.DataAccess.Contracts;
 using FirewallWidget.DataAccess.Contracts.Context;
+
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -14,17 +14,18 @@ namespace FirewallWidget.DataAccess.Repositories.EF
         where TEntity : class
     {
         protected readonly IEFDbContext dbContext;
-        private readonly DbSet<TEntity> entities;
+
+        protected DbSet<TEntity> Entities { get; }
 
         public BaseRepository(IEFDbContext dbContext, DbSet<TEntity> entities)
         {
             this.dbContext = dbContext;
-            this.entities = entities;
+            Entities = entities;
         }
 
         public virtual TEntity Create(TEntity entity)
         {
-            var e = entities.Add(entity);
+            var e = Entities.Add(entity);
             dbContext.Context.SaveChanges();
 
             return e;
@@ -32,10 +33,10 @@ namespace FirewallWidget.DataAccess.Repositories.EF
 
         public virtual TKey Delete(TKey primaryKey)
         {
-            var e = entities.Find(primaryKey);
+            var e = Entities.Find(primaryKey);
             if (e != null)
             {
-                entities.Remove(e);
+                Entities.Remove(e);
                 dbContext.Context.SaveChanges();
                 return primaryKey;
             }
@@ -44,18 +45,18 @@ namespace FirewallWidget.DataAccess.Repositories.EF
 
         public virtual TEntity Read(TKey primaryKey)
         {
-            return entities.Find(primaryKey);
+            return Entities.Find(primaryKey);
         }
 
         public virtual IEnumerable<TEntity> Read(
             Expression<Func<TEntity, bool>> predicate)
         {
-            return entities.Where(predicate);
+            return Entities.Where(predicate);
         }
 
         public virtual TEntity Update(TEntity entity)
         {
-            entities.AddOrUpdate(entity);
+            Entities.AddOrUpdate(entity);
             dbContext.Context.SaveChanges();
 
             return entity;

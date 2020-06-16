@@ -45,6 +45,7 @@
             this.pnlRules = new System.Windows.Forms.Panel();
             this.pnlScrollDown = new System.Windows.Forms.Panel();
             this.pnlScrollUp = new System.Windows.Forms.Panel();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             this.optionsMenu.SuspendLayout();
             this.pboxContext.SuspendLayout();
@@ -82,10 +83,11 @@
             this.optionsMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addRulesToolStripMenuItem,
             this.publicAllowOutboundToolStripMenuItem,
+            this.optionsToolStripMenuItem,
             this.toolStripMenuItem3,
             this.exitToolStripMenuItem});
             this.optionsMenu.Name = "optionsMenu";
-            this.optionsMenu.Size = new System.Drawing.Size(301, 76);
+            this.optionsMenu.Size = new System.Drawing.Size(301, 120);
             this.optionsMenu.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.OptionsMenu_Closed);
             // 
             // addRulesToolStripMenuItem
@@ -197,6 +199,13 @@
             this.pnlScrollUp.MouseEnter += new System.EventHandler(this.ShowForm);
             this.pnlScrollUp.MouseLeave += new System.EventHandler(this.HideForm);
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(300, 22);
+            this.optionsToolStripMenuItem.Text = "&Options";
+            this.optionsToolStripMenuItem.Click += new System.EventHandler(this.OptionsToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -240,6 +249,7 @@
         private System.Windows.Forms.Panel pnlScrollUp;
         private System.Windows.Forms.Panel pnlScrollDown;
         private System.Windows.Forms.Panel pnlRules;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
     }
 }
 

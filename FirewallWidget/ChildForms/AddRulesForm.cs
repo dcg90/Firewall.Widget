@@ -1,14 +1,14 @@
 ﻿using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
+using FirewallWidget.Presentation;
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace FirewallWidget.ChildForms
 {
-    public partial class AddRulesForm : Form
+    public partial class AddRulesForm : NextToMainForm
     {
         private readonly IFirewallService firewallService;
         private ProfileItem currentProfile;
@@ -16,13 +16,12 @@ namespace FirewallWidget.ChildForms
 
         internal List<RuleDto> SelectedRules { get; private set; }
 
-        public AddRulesForm(Form main, IFirewallService firewallService)
+        public AddRulesForm(MainForm main, IFirewallService firewallService)
+            : base(main)
         {
             this.firewallService = firewallService;
 
             InitializeComponent();
-
-            Location = PointToScreen(new Point(main.Location.X + main.Width + 2, main.Location.Y));
 
             FillCombos();
             LoadRules();

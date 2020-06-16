@@ -11,12 +11,12 @@ namespace FirewallWidget.DataAccess.Repositories.EF
         IRulesRepository
     {
         public RulesRepository(IEFDbContext dbContext)
-            : base(dbContext, dbContext.Rules)
+            : base(dbContext, dbContext.Context.Set<Rule>())
         { }
 
         public bool RuleExist(string name)
         {
-            var q = from r in dbContext.Rules
+            var q = from r in Entities
                     where r.Name == name
                     select r;
 

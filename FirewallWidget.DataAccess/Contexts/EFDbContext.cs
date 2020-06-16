@@ -1,7 +1,6 @@
 ﻿using FirewallWidget.Data;
 using FirewallWidget.DataAccess.Contracts.Context;
 
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 
 namespace FirewallWidget.DataAccess.Contexts
@@ -18,11 +17,8 @@ namespace FirewallWidget.DataAccess.Contexts
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Rule>()
-               .HasKey(r => r.Id);
-            modelBuilder.Entity<Rule>()
-                .Property(r => r.Id)
-                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+            modelBuilder.Entity<Rule>().CreateModel();
+            modelBuilder.Entity<Options>().CreateModel();
 
             base.OnModelCreating(modelBuilder);
         }

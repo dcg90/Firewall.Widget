@@ -1,6 +1,6 @@
 ﻿using FirewallWidget.ChildForms;
 using FirewallWidget.Manager.DTO;
-
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Drawing;
 using System.IO;
@@ -20,10 +20,20 @@ namespace FirewallWidget.Presentation
             Close();
         }
 
+        private void OptionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowForm();
+            using (var options = Provider.GetRequiredService<OptionsForm>())
+            {
+                options.ShowDialog();
+            }
+            HideForm();
+        }
+
         private void AddRulesToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
             ShowForm();
-            using (var addRulesForm = new AddRulesForm(this, firewallService))
+            using (var addRulesForm = Provider.GetRequiredService<AddRulesForm>())
             {
                 if (addRulesForm.ShowDialog() == DialogResult.OK)
                 {

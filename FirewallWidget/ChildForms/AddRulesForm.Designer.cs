@@ -141,9 +141,10 @@
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(281, 370);
+            this.btnOk.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnOk.Location = new System.Drawing.Point(281, 362);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 23);
+            this.btnOk.Size = new System.Drawing.Size(75, 29);
             this.btnOk.TabIndex = 3;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = true;
