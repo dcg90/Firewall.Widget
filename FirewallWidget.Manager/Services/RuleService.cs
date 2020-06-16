@@ -90,5 +90,14 @@ namespace FirewallWidget.Manager.Services
 
             return ServiceResult<int>.Success(inserted);
         }
+
+        public IEnumerable<RuleDto> ReadRules(ProfileDto profile, RuleDirectionDto direction)
+        {
+            int p = (int)profile, dir = (int)direction;
+            var rules = rulesRepository
+                .Read(r => r.Direction == dir && r.Profile == p);
+
+            return mapper.Map<IEnumerable<RuleDto>>(rules);
+        }
     }
 }

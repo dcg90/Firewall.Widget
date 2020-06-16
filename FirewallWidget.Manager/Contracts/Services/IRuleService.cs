@@ -18,6 +18,6 @@ namespace FirewallWidget.Manager.Contracts.Services
 
         IEnumerable<RuleDto> ReadAll();
 
-
+        IEnumerable<RuleDto> ReadRules(ProfileDto profile, RuleDirectionDto direction);
     }
 }
