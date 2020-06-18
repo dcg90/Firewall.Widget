@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{962DD15F-CB40-427D-B2B6-62BCC6ACB867}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>FirewallWidget</RootNamespace>
+    <RootNamespace>FirewallWidget.Presentation</RootNamespace>
     <AssemblyName>FirewallWidget</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -137,6 +137,7 @@
     <Compile Include="ChildForms\SelectRuleForm.Designer.cs">
       <DependentUpon>SelectRuleForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FirewallWidgetConstants.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>

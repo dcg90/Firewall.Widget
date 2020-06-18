@@ -120,19 +120,24 @@
             // 
             // pnlRules
             // 
+            this.pnlRules.AllowDrop = true;
             this.pnlRules.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.pnlRules.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlRules.Location = new System.Drawing.Point(0, 17);
             this.pnlRules.Name = "pnlRules";
             this.pnlRules.Size = new System.Drawing.Size(80, 339);
             this.pnlRules.TabIndex = 5;
+            this.pnlRules.DragDrop += new System.Windows.Forms.DragEventHandler(this.PnlRules_DragDrop);
+            this.pnlRules.DragEnter += new System.Windows.Forms.DragEventHandler(this.PnlRules_DragEnter);
+            this.pnlRules.DragOver += new System.Windows.Forms.DragEventHandler(this.PnlRules_DragOver);
+            this.pnlRules.DragLeave += new System.EventHandler(this.PnlRules_DragLeave);
             this.pnlRules.MouseEnter += new System.EventHandler(this.ShowForm);
             this.pnlRules.MouseLeave += new System.EventHandler(this.HideForm);
             // 
             // pnlScrollDown
             // 
             this.pnlScrollDown.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.pnlScrollDown.BackgroundImage = global::FirewallWidget.Properties.Resources.down_arrow;
+            this.pnlScrollDown.BackgroundImage = global::FirewallWidget.Presentation.Properties.Resources.down_arrow;
             this.pnlScrollDown.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.pnlScrollDown.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pnlScrollDown.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -148,7 +153,7 @@
             // pnlScrollUp
             // 
             this.pnlScrollUp.BackColor = System.Drawing.SystemColors.ScrollBar;
-            this.pnlScrollUp.BackgroundImage = global::FirewallWidget.Properties.Resources.up_arrow2_disabled;
+            this.pnlScrollUp.BackgroundImage = global::FirewallWidget.Presentation.Properties.Resources.up_arrow2_disabled;
             this.pnlScrollUp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.pnlScrollUp.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pnlScrollUp.Dock = System.Windows.Forms.DockStyle.Top;

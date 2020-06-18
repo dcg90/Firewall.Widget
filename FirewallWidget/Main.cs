@@ -10,6 +10,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+using static FirewallWidget.Presentation.FirewallWidgetConstants;
+
 namespace FirewallWidget.Presentation
 {
     public partial class MainForm : NoTaskBarAltTabForm
@@ -20,7 +22,6 @@ namespace FirewallWidget.Presentation
         private readonly IRuleService ruleService;
         private int scrollRulesPosition = 0;
         private bool canScrollRulesDown, canScrollRulesUp;
-        private readonly Point firstRuleLocation = new Point(5, 5);
 
         public MainForm(IServiceProvider provider)
         {
@@ -75,11 +76,7 @@ namespace FirewallWidget.Presentation
                         var deleteResult = ruleService.Delete(r.Id);
                         if (deleteResult.Successful)
                         {
-                            if (rc.Next != null)
-                            { rc.Next.SetPrevious(rc.Previous, firstRuleLocation); }
-                            if (rc.Previous != null)
-                            { rc.Previous.Next = rc.Next; }
-
+                            DetachRuleControl(rc);
                             pnlRules.Controls.Remove(rc);
                         }
                     };
@@ -97,6 +94,25 @@ namespace FirewallWidget.Presentation
             { ruleService.Delete(ruleToDelete.Id); }
 
             ResetRulesScroll();
+        }
+
+        private void DetachRuleControl(RuleControl rc)
+        {
+            if (rc.Next != null)
+            { rc.Next.SetPrevious(rc.Previous); }
+            if (rc.Previous != null)
+            { rc.Previous.Next = rc.Next; }
+        }
+
+        private void AttachRuleControl(RuleControl rc, RuleControl prev, RuleControl next)
+        {
+            if (prev != null)
+            { prev.Next = rc; }
+            if (next != null)
+            { next.SetPrevious(rc); }
+
+            rc.SetPrevious(prev);
+            rc.Next = next;
         }
 
         private RuleControl ProcessRule(RuleDto rule, List<RuleDto> removeRules, RuleControl prev)
@@ -124,7 +140,7 @@ namespace FirewallWidget.Presentation
                 else
                 {
                     var ruleControl = prev == null
-                        ? new RuleControl(rule, fwRule, firstRuleLocation, firewallService)
+                        ? new RuleControl(rule, fwRule, FIRST_RULE_LOCATION, firewallService)
                         : new RuleControl(rule, fwRule, prev, firewallService);
                     return ruleControl;
                 }
@@ -141,11 +157,6 @@ namespace FirewallWidget.Presentation
             { removeRules.Add(rule); }
         }
 
-
-
-
-
-
         private void ShowForm()
         {
             Location = new Point(0, 0);
@@ -156,9 +167,6 @@ namespace FirewallWidget.Presentation
             if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
             { Location = new Point(-40, 0); }
         }
-
-        private static PictureBox GetPBoxFromSender(object sender)
-        { return ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl as PictureBox; }
 
         private void ResetRulesScroll()
         {
@@ -204,7 +212,6 @@ namespace FirewallWidget.Presentation
             }
         }
 
-
         private void ScrollRulesDown()
         {
             if (!canScrollRulesDown)
@@ -229,5 +236,31 @@ namespace FirewallWidget.Presentation
                 canScrollRulesUp = true;
             }
         }
+
+        private (RuleControl, bool) GetRuleDragInfoFromCursorLocation(Point cursorLocation)
+        {
+            var pnlCursorLocation = pnlRules.PointToClient(cursorLocation);
+            var childControl = pnlRules.GetChildAtPoint(pnlCursorLocation);
+            if (childControl is RuleControl ruleControl)
+            {
+                var ruleCursorLocation = ruleControl.PointToClient(cursorLocation);
+                return (ruleControl, ruleCursorLocation.Y < ruleControl.Height / 2.0);
+            }
+            return (null, false);
+        }
+
+        private RuleControl FindRuleControlFromPoint(RuleControl dragging, int Y, int dirY)
+        {
+            var pt = pnlRules.PointToClient(new Point(pnlRules.Width / 2, Y));
+            while (pnlRules.ClientRectangle.Contains(pt))
+            {
+                if (pnlRules.GetChildAtPoint(pt) is RuleControl ruleControl && ruleControl != dragging)
+                { return ruleControl; }
+                pt.Y += dirY * 31;
+            }
+
+            return null;
+        }
+
     }
 }

@@ -6,7 +6,9 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Windows.Forms;
 
-namespace FirewallWidget
+using static FirewallWidget.Presentation.FirewallWidgetConstants;
+
+namespace FirewallWidget.Presentation
 {
     public partial class RuleControl
     {
@@ -31,7 +33,7 @@ namespace FirewallWidget
         private Point LocationFromPrevious()
         {
             return new Point(
-                Previous.Location.X, Previous.Location.Y + Previous.Height + 5);
+                Previous.Location.X, Previous.Location.Y + Previous.Height + VERTICAL_RULES_MARGIN);
         }
 
         private void SetPictureBoxImage()
@@ -133,5 +135,25 @@ namespace FirewallWidget
         {
             HideForm?.Invoke(this);
         }
+
+        private void SwitchRuleEnabled()
+        {
+            try
+            {
+                var enabled = firewallService.SwitchEnabled(firewallRuleDto);
+                pboxRule.Image = enabled ? icon : iconGrayScale;
+            }
+            catch (Exception exc)
+            {
+                if (MessageBox.Show(
+                    "The following error occurred: \n" + exc.Message + "\nDelete this rule?", "Error",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
+                {
+                    DeleteRule?.Invoke(this, rule);
+                }
+            }
+        }
+
+
     }
 }

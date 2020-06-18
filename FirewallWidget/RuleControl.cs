@@ -6,7 +6,9 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace FirewallWidget
+using static FirewallWidget.Presentation.FirewallWidgetConstants;
+
+namespace FirewallWidget.Presentation
 {
     public partial class RuleControl : UserControl
     {
@@ -16,6 +18,8 @@ namespace FirewallWidget
 
         private Bitmap iconGrayScale;
         private Bitmap icon;
+        private bool mouseDown;
+        private Point mouseDownLocation;
 
         public RuleControl Previous { get; private set; }
         public RuleControl Next { get; set; }
@@ -37,7 +41,7 @@ namespace FirewallWidget
 
             InitializeComponent();
 
-            this.Previous = previous;
+            Previous = previous;
             this.rule = rule;
             this.firewallRuleDto = firewallRuleDto;
             this.firewallService = firewallService;
@@ -57,7 +61,7 @@ namespace FirewallWidget
           : this(rule, firewallRuleDto, null, location, firewallService)
         { }
 
-        public void SetPrevious(RuleControl nextPrevious, Point? defaultLocation = null)
+        public void SetPrevious(RuleControl nextPrevious, bool updateLocation = true)
         {
             if (Previous != null && !Previous.IsDisposed)
             { Previous.LocationChanged -= UpdateLocation; }
@@ -66,26 +70,11 @@ namespace FirewallWidget
             { nextPrevious.LocationChanged += UpdateLocation; }
 
             Previous = nextPrevious;
-            Location = Previous != null
-                ? LocationFromPrevious()
-                : (defaultLocation ?? new Point());
-        }
-
-        private void PboxRule_Click(object sender, EventArgs e)
-        {
-            try
+            if (updateLocation)
             {
-                var enabled = firewallService.SwitchEnabled(firewallRuleDto);
-                pboxRule.Image = enabled ? icon : iconGrayScale;
-            }
-            catch (Exception exc)
-            {
-                if (MessageBox.Show(
-                    "The following error occurred: \n" + exc.Message + "\nDelete this rule?", "Error",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
-                {
-                    DeleteRule?.Invoke(this, rule);
-                }
+                Location = Previous != null
+                      ? LocationFromPrevious()
+                      : FIRST_RULE_LOCATION;
             }
         }
 
@@ -141,6 +130,31 @@ namespace FirewallWidget
         private void PboxContext_Closed(object sender, ToolStripDropDownClosedEventArgs e)
         {
             RaiseHideForm();
+        }
+
+        private void PboxRule_MouseDown(object sender, MouseEventArgs e)
+        {
+            mouseDown = true;
+            mouseDownLocation = e.Location;
+        }
+
+        private void PboxRule_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (mouseDown && e.Button == MouseButtons.Left)
+            {
+                var a = Math.Abs(e.X - mouseDownLocation.X) * Math.Abs(e.Y - mouseDownLocation.Y);
+                if (a >= 5)
+                {
+                    mouseDown = false;
+                    DoDragDrop(this, DragDropEffects.Move | DragDropEffects.Copy);
+                }
+            }
+        }
+
+        private void PboxRule_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            { SwitchRuleEnabled(); }
         }
     }
 }

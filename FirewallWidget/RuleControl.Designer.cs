@@ -1,4 +1,4 @@
-﻿namespace FirewallWidget
+﻿namespace FirewallWidget.Presentation
 {
     partial class RuleControl
     {
@@ -50,8 +50,10 @@
             this.pboxRule.Size = new System.Drawing.Size(32, 32);
             this.pboxRule.TabIndex = 0;
             this.pboxRule.TabStop = false;
-            this.pboxRule.Click += new System.EventHandler(this.PboxRule_Click);
+            this.pboxRule.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PboxRule_MouseDown);
             this.pboxRule.MouseLeave += new System.EventHandler(this.PboxRule_MouseLeave);
+            this.pboxRule.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PboxRule_MouseMove);
+            this.pboxRule.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PboxRule_MouseUp);
             // 
             // pboxContext
             // 
@@ -61,33 +63,33 @@
             this.toolStripMenuItem1,
             this.removeRuleToolStripMenuItem});
             this.pboxContext.Name = "pboxContext";
-            this.pboxContext.Size = new System.Drawing.Size(181, 98);
+            this.pboxContext.Size = new System.Drawing.Size(144, 76);
             this.pboxContext.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.PboxContext_Closed);
             this.pboxContext.Opening += new System.ComponentModel.CancelEventHandler(this.PboxContext_Opening);
             // 
             // setIconToolStripMenuItem
             // 
             this.setIconToolStripMenuItem.Name = "setIconToolStripMenuItem";
-            this.setIconToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.setIconToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.setIconToolStripMenuItem.Text = "Set Icon";
             this.setIconToolStripMenuItem.Click += new System.EventHandler(this.SetIconToolStripMenuItem_Click);
             // 
             // removeIconToolStripMenuItem
             // 
             this.removeIconToolStripMenuItem.Name = "removeIconToolStripMenuItem";
-            this.removeIconToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeIconToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.removeIconToolStripMenuItem.Text = "Remove Icon";
             this.removeIconToolStripMenuItem.Click += new System.EventHandler(this.RemoveIconToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(140, 6);
             // 
             // removeRuleToolStripMenuItem
             // 
             this.removeRuleToolStripMenuItem.Name = "removeRuleToolStripMenuItem";
-            this.removeRuleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeRuleToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.removeRuleToolStripMenuItem.Text = "Remove Rule";
             this.removeRuleToolStripMenuItem.Click += new System.EventHandler(this.RemoveRuleToolStripMenuItem_Click);
             // 
