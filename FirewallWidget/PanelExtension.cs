@@ -3,6 +3,8 @@
 using System.Drawing;
 using System.Windows.Forms;
 
+using static FirewallWidget.Presentation.FirewallWidgetConstants;
+
 namespace FirewallWidget
 {
     internal static class PanelExtension
@@ -11,12 +13,12 @@ namespace FirewallWidget
         {
             switch (pnl.Tag)
             {
-                case "ScrollUp":
+                case SCROLL_UP_TAG:
                     pnl.BackColor = SystemColors.ScrollBar;
                     pnl.BackgroundImage = Resources.up_arrow2_disabled;
                     pnl.Cursor = Cursors.Default;
                     break;
-                case "ScrollDown":
+                case SCROLL_DOWN_TAG:
                     pnl.BackColor = SystemColors.ScrollBar;
                     pnl.BackgroundImage = Resources.down_arrow_disabled;
                     pnl.Cursor = Cursors.Default;
@@ -30,12 +32,12 @@ namespace FirewallWidget
         {
             switch (pnl.Tag)
             {
-                case "ScrollUp":
+                case SCROLL_UP_TAG:
                     pnl.BackColor = SystemColors.GradientActiveCaption;
                     pnl.BackgroundImage = Resources.up_arrow2;
                     pnl.Cursor = Cursors.Hand;
                     break;
-                case "ScrollDown":
+                case SCROLL_DOWN_TAG:
                     pnl.BackColor = SystemColors.GradientActiveCaption;
                     pnl.BackgroundImage = Resources.down_arrow;
                     pnl.Cursor = Cursors.Hand;

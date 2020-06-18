@@ -49,6 +49,8 @@ namespace FirewallWidget.Presentation
                 else if (e.Delta > 0)
                 { ScrollRulesUp(); }
             };
+            pnlScrollDown.Tag = SCROLL_DOWN_TAG;
+            pnlScrollUp.Tag = SCROLL_UP_TAG;
         }
 
         private void SetOutBoundConnectionState(ToolStripMenuItem item, ProfileDto profile)

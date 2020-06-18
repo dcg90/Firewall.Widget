@@ -9,5 +9,9 @@ namespace FirewallWidget.Presentation
         public static readonly Point FIRST_RULE_LOCATION = new Point(5, 5);
 
         public const int VERTICAL_RULES_MARGIN = 6;
+
+        public const string SCROLL_UP_TAG = "ScrollUp";
+
+        public const string SCROLL_DOWN_TAG = "ScrollDown";
     }
 }

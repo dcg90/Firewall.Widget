@@ -136,6 +136,7 @@
             // 
             // pnlScrollDown
             // 
+            this.pnlScrollDown.AllowDrop = true;
             this.pnlScrollDown.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
             this.pnlScrollDown.BackgroundImage = global::FirewallWidget.Presentation.Properties.Resources.down_arrow;
             this.pnlScrollDown.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
@@ -147,11 +148,14 @@
             this.pnlScrollDown.TabIndex = 4;
             this.pnlScrollDown.Tag = "ScrollDown";
             this.pnlScrollDown.Click += new System.EventHandler(this.ScrollRulesDownHandler);
+            this.pnlScrollDown.DragEnter += new System.Windows.Forms.DragEventHandler(this.PnlScroll_DragEnter);
+            this.pnlScrollDown.DragOver += new System.Windows.Forms.DragEventHandler(this.PnlScroll_DragOver);
             this.pnlScrollDown.MouseEnter += new System.EventHandler(this.ShowForm);
             this.pnlScrollDown.MouseLeave += new System.EventHandler(this.HideForm);
             // 
             // pnlScrollUp
             // 
+            this.pnlScrollUp.AllowDrop = true;
             this.pnlScrollUp.BackColor = System.Drawing.SystemColors.ScrollBar;
             this.pnlScrollUp.BackgroundImage = global::FirewallWidget.Presentation.Properties.Resources.up_arrow2_disabled;
             this.pnlScrollUp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
@@ -163,6 +167,8 @@
             this.pnlScrollUp.TabIndex = 2;
             this.pnlScrollUp.Tag = "ScrollUp";
             this.pnlScrollUp.Click += new System.EventHandler(this.ScrollRulesUpHandler);
+            this.pnlScrollUp.DragEnter += new System.Windows.Forms.DragEventHandler(this.PnlScroll_DragEnter);
+            this.pnlScrollUp.DragOver += new System.Windows.Forms.DragEventHandler(this.PnlScroll_DragOver);
             this.pnlScrollUp.MouseEnter += new System.EventHandler(this.ShowForm);
             this.pnlScrollUp.MouseLeave += new System.EventHandler(this.HideForm);
             // 

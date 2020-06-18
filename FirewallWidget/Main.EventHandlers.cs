@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 using static FirewallWidget.Presentation.FirewallWidgetConstants;
@@ -88,7 +89,6 @@ namespace FirewallWidget.Presentation
             ScrollRulesDown();
         }
 
-
         private void PnlRules_DragEnter(object sender, DragEventArgs e)
         {
             e.Effect = e.Data.GetDataPresent(RULE_CONTROL_DRAG_FORMAT)
@@ -156,5 +156,40 @@ namespace FirewallWidget.Presentation
         {
             pnlRules.Invalidate();
         }
+
+        private void PnlScroll_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(RULE_CONTROL_DRAG_FORMAT))
+            {
+                if (sender is Panel scroll)
+                {
+                    switch (scroll.Tag)
+                    {
+                        case SCROLL_UP_TAG:
+                            ScrollRulesUp();
+                            break;
+                        case SCROLL_DOWN_TAG:
+                            ScrollRulesDown();
+                            break;
+                    }
+                }
+            }
+        }
+
+        private void PnlScroll_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.None;
+            if (sender is Panel scroll && scroll.Tag is string tag)
+            {
+                var canDrag = tag == SCROLL_UP_TAG
+                    ? canScrollRulesUp
+                    : tag == SCROLL_DOWN_TAG
+                        ? canScrollRulesDown
+                        : false;
+                if (e.Data.GetDataPresent(RULE_CONTROL_DRAG_FORMAT) && canDrag)
+                { e.Effect = DragDropEffects.Move; }
+            }
+        }
+
     }
 }
