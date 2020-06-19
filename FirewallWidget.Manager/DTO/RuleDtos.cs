@@ -15,5 +15,7 @@ namespace FirewallWidget.Manager.DTO
         public ProfileDto Profile { get; set; }
 
         public RuleDirectionDto Direction { get; set; }
+
+        public int Order { get; set; }
     }
 }

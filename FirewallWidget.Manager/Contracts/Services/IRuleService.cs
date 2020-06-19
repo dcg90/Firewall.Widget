@@ -8,7 +8,7 @@ namespace FirewallWidget.Manager.Contracts.Services
     {
         ServiceResult<RuleDto> Create(RuleDto rule);
 
-        ServiceResult<int> Create(params RuleDto[] rules);
+        ServiceResult<IEnumerable<RuleDto>> Create(params RuleDto[] rules);
 
         ServiceResult<RuleDto> Read(int key);
 
