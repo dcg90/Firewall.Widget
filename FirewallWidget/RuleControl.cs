@@ -12,7 +12,6 @@ namespace FirewallWidget.Presentation
 {
     public partial class RuleControl : UserControl
     {
-        private readonly RuleDto rule;
         private readonly FirewallRuleDto firewallRuleDto;
         private readonly IFirewallService firewallService;
 
@@ -22,7 +21,10 @@ namespace FirewallWidget.Presentation
         private Point mouseDownLocation;
 
         public RuleControl Previous { get; private set; }
+
         public RuleControl Next { get; set; }
+
+        public RuleDto Rule { get; private set; }
 
         public event Action<RuleControl, RuleDto> DeleteRule;
         public event Action<RuleControl, RuleDto> UpdateRule;
@@ -42,7 +44,7 @@ namespace FirewallWidget.Presentation
             InitializeComponent();
 
             Previous = previous;
-            this.rule = rule;
+            Rule = rule;
             this.firewallRuleDto = firewallRuleDto;
             this.firewallService = firewallService;
 
@@ -92,11 +94,11 @@ namespace FirewallWidget.Presentation
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                rule.Icon = Path.GetExtension(ofd.FileName) == ".exe"
+                Rule.Icon = Path.GetExtension(ofd.FileName) == ".exe"
                     ? GetExeIcon(ofd.FileName)
                     : new Icon(ofd.FileName).ToBitmap();
 
-                UpdateRule?.Invoke(this, rule);
+                UpdateRule?.Invoke(this, Rule);
                 SetPictureBoxImage();
             }
 
@@ -105,15 +107,15 @@ namespace FirewallWidget.Presentation
 
         private void RemoveIconToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            rule.Icon = null;
-            UpdateRule?.Invoke(this, rule);
+            Rule.Icon = null;
+            UpdateRule?.Invoke(this, Rule);
             SetPictureBoxImage();
             RaiseHideForm();
         }
 
         private void RemoveRuleToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DeleteRule?.Invoke(this, rule);
+            DeleteRule?.Invoke(this, Rule);
             RaiseHideForm();
         }
 
@@ -124,7 +126,7 @@ namespace FirewallWidget.Presentation
 
         private void PboxContext_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            removeIconToolStripMenuItem.Enabled = rule.Icon != null;
+            removeIconToolStripMenuItem.Enabled = Rule.Icon != null;
         }
 
         private void PboxContext_Closed(object sender, ToolStripDropDownClosedEventArgs e)

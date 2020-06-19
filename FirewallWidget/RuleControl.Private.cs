@@ -47,8 +47,8 @@ namespace FirewallWidget.Presentation
 
         private void CreateRuleIcon()
         {
-            if (rule.Icon != null)
-            { (icon, iconGrayScale) = (rule.Icon, (Bitmap)ToolStripRenderer.CreateDisabledImage(rule.Icon)); }
+            if (Rule.Icon != null)
+            { (icon, iconGrayScale) = (Rule.Icon, (Bitmap)ToolStripRenderer.CreateDisabledImage(Rule.Icon)); }
             else if (File.Exists(firewallRuleDto.ProgramPath))
             {
                 icon = GetExeIcon(firewallRuleDto.ProgramPath);
@@ -149,7 +149,7 @@ namespace FirewallWidget.Presentation
                     "The following error occurred: \n" + exc.Message + "\nDelete this rule?", "Error",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
                 {
-                    DeleteRule?.Invoke(this, rule);
+                    DeleteRule?.Invoke(this, Rule);
                 }
             }
         }

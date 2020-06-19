@@ -13,5 +13,7 @@
         public int Profile { get; set; }
 
         public int Direction { get; set; }
+
+        public int Order { get; set; }
     }
 }

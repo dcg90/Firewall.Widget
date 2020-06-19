@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 
 using static FirewallWidget.Presentation.FirewallWidgetConstants;
@@ -41,8 +40,9 @@ namespace FirewallWidget.Presentation
             {
                 if (addRulesForm.ShowDialog() == DialogResult.OK)
                 {
-                    ruleService.Create(addRulesForm.SelectedRules.ToArray());
-                    LoadRules();
+                    var ar = ruleService.Create(addRulesForm.SelectedRules.ToArray());
+                    if (ar.Successful)
+                    { AddRules(ar.DTO); }
                 }
             }
             HideForm();
@@ -122,6 +122,7 @@ namespace FirewallWidget.Presentation
 
                     DetachRuleControl(draggingRuleControl);
                     AttachRuleControl(draggingRuleControl, prev, next);
+                    UpdateRulesOrder();
                 }
             }
         }

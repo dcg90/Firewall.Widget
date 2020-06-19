@@ -63,15 +63,22 @@ namespace FirewallWidget.Presentation
 
         private void LoadRules()
         {
-            var removeRules = new List<RuleDto>();
             pnlRules.Controls.Clear();
-            RuleControl prev = null;
+            AddRulesToPanel(ruleService.ReadAll());
+        }
 
-            foreach (var rule in ruleService.ReadAll())
+        private RuleControl AddRulesToPanel(IEnumerable<RuleDto> rules)
+        {
+            var removeRules = new List<RuleDto>();
+            RuleControl prev = null;
+            RuleControl head = null;
+
+            foreach (var rule in rules)
             {
                 var ruleControl = ProcessRule(rule, removeRules, prev);
                 if (ruleControl != null)
                 {
+                    head = head ?? ruleControl;
                     ruleControl.HideForm += (rc) => { HideForm(); };
                     ruleControl.DeleteRule += (rc, r) =>
                     {
@@ -96,6 +103,8 @@ namespace FirewallWidget.Presentation
             { ruleService.Delete(ruleToDelete.Id); }
 
             ResetRulesScroll();
+
+            return head;
         }
 
         private void DetachRuleControl(RuleControl rc)
@@ -262,6 +271,42 @@ namespace FirewallWidget.Presentation
             }
 
             return null;
+        }
+
+        private void UpdateRulesOrder()
+        {
+            var head = Head;
+            var order = 1;
+
+            while (head != null)
+            {
+                head.Rule.Order = order++;
+                ruleService.Update(head.Rule);
+                head = head.Next;
+            }
+        }
+
+        private RuleControl Head
+            => pnlRules.Controls
+                    .OfType<RuleControl>()
+                    .FirstOrDefault(rc => rc.Previous == null);
+
+        private RuleControl Tail
+            => pnlRules.Controls
+                .OfType<RuleControl>()
+                .FirstOrDefault(rc => rc.Next == null);
+
+        private void AddRules(IEnumerable<RuleDto> addedRules)
+        {
+            var prev = Tail;
+
+            var head = AddRulesToPanel(addedRules);
+
+            head.SetPrevious(prev);
+            if (prev != null)
+            { prev.Next = head; }
+
+            UpdateRulesOrder();
         }
 
     }

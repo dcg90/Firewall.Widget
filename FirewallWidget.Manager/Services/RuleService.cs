@@ -39,10 +39,11 @@ namespace FirewallWidget.Manager.Services
             return ServiceResult<RuleDto>.Success(mapper.Map<RuleDto>(rule));
         }
 
-        public ServiceResult<int> Create(params RuleDto[] rules)
+        public ServiceResult<IEnumerable<RuleDto>> Create(params RuleDto[] rules)
         {
             rules = rules ?? new RuleDto[0];
             var options = optionsRepository.ReadOptions();
+            var result = new List<RuleDto>();
 
             foreach (var rule in rules)
             {
@@ -53,10 +54,12 @@ namespace FirewallWidget.Manager.Services
                     foreach (var id in rulesDb.Select(r => r.Id))
                     { rulesRepository.Delete(id); }
                 }
-                rulesRepository.Create(mapper.Map<Rule>(rule));
+                var ruleDb = rulesRepository.Create(mapper.Map<Rule>(rule));
+                if (ruleDb != null)
+                { result.Add(mapper.Map<RuleDto>(ruleDb)); }
             }
 
-            return ServiceResult<int>.Success(rules.Length);
+            return ServiceResult<IEnumerable<RuleDto>>.Success(result);
         }
 
         public ServiceResult<int> Delete(int key)
@@ -71,7 +74,7 @@ namespace FirewallWidget.Manager.Services
         public IEnumerable<RuleDto> ReadAll()
         {
             return mapper.Map<IEnumerable<RuleDto>>(
-                rulesRepository.Read(r => true).OrderBy(r => r.Name));
+                rulesRepository.Read(r => true).OrderBy(r => r.Order));
         }
 
         public ServiceResult<RuleDto> Read(int key)
