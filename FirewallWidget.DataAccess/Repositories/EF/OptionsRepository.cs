@@ -21,7 +21,7 @@ namespace FirewallWidget.DataAccess.Repositories.EF
 
         public Options ReadOptions()
         {
-            return options.FirstOrDefault();
+            return options.AsNoTracking().FirstOrDefault();
         }
 
         public void UpdateOptions(Options options)

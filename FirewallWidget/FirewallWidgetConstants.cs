@@ -13,5 +13,7 @@ namespace FirewallWidget.Presentation
         public const string SCROLL_UP_TAG = "ScrollUp";
 
         public const string SCROLL_DOWN_TAG = "ScrollDown";
+
+        public const int FORM_WIDTH = 42;
     }
 }

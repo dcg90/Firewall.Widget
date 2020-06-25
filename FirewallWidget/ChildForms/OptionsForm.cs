@@ -10,19 +10,36 @@ namespace FirewallWidget.ChildForms
         private readonly IOptionsService optionsService;
 
         public OptionsForm(MainForm mainForm, IOptionsService optionsService)
-            : base(mainForm)
+            : base(mainForm, optionsService)
         {
             InitializeComponent();
 
             options = optionsService.ReadOptions();
             this.optionsService = optionsService;
 
-            cboxOverrideRules.Checked = options.OverrideRules;
+            MyInitializeComponent();
         }
 
-        private void cboxOverrideRules_CheckedChanged(object sender, System.EventArgs e)
+        private void MyInitializeComponent()
+        {
+            cboxOverrideRules.Checked = options.OverrideRules;
+            cboxDockLeft.Checked = options.DockLeft;
+        }
+
+        private void CboxOverrideRules_CheckedChanged(object sender, System.EventArgs e)
         {
             options.OverrideRules = cboxOverrideRules.Checked;
+            UpdateOptions();
+        }
+
+        private void CboxDockLeft_CheckedChanged(object sender, System.EventArgs e)
+        {
+            options.DockLeft = cboxDockLeft.Checked;
+            UpdateOptions();
+        }
+
+        private void UpdateOptions()
+        {
             optionsService.UpdateOptions(options);
         }
     }
