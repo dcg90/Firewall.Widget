@@ -33,6 +33,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.cboxDockLeft = new System.Windows.Forms.CheckBox();
             this.cboxOverrideRules = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -82,12 +83,24 @@
             // 
             // panel3
             // 
+            this.panel3.Controls.Add(this.cboxDockLeft);
             this.panel3.Controls.Add(this.cboxOverrideRules);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(0, 31);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(409, 251);
             this.panel3.TabIndex = 4;
+            // 
+            // cboxDockLeft
+            // 
+            this.cboxDockLeft.AutoSize = true;
+            this.cboxDockLeft.Location = new System.Drawing.Point(3, 24);
+            this.cboxDockLeft.Name = "cboxDockLeft";
+            this.cboxDockLeft.Size = new System.Drawing.Size(117, 18);
+            this.cboxDockLeft.TabIndex = 1;
+            this.cboxDockLeft.Text = "Dock to left?";
+            this.cboxDockLeft.UseVisualStyleBackColor = true;
+            this.cboxDockLeft.CheckedChanged += new System.EventHandler(this.CboxDockLeft_CheckedChanged);
             // 
             // cboxOverrideRules
             // 
@@ -101,7 +114,7 @@
             this.cboxOverrideRules.TabIndex = 0;
             this.cboxOverrideRules.Text = "Overwrite rules with same name, direction and profile?";
             this.cboxOverrideRules.UseVisualStyleBackColor = true;
-            this.cboxOverrideRules.CheckedChanged += new System.EventHandler(this.cboxOverrideRules_CheckedChanged);
+            this.cboxOverrideRules.CheckedChanged += new System.EventHandler(this.CboxOverrideRules_CheckedChanged);
             // 
             // OptionsForm
             // 
@@ -134,5 +147,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.CheckBox cboxOverrideRules;
+        private System.Windows.Forms.CheckBox cboxDockLeft;
     }
 }

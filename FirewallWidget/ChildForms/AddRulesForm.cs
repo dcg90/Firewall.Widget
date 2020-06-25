@@ -18,8 +18,9 @@ namespace FirewallWidget.ChildForms
 
         internal List<RuleDto> SelectedRules { get; private set; }
 
-        public AddRulesForm(MainForm main, IFirewallService firewallService, IRuleService ruleService)
-            : base(main)
+        public AddRulesForm(MainForm main, IFirewallService firewallService,
+            IRuleService ruleService, IOptionsService optionsService)
+            : base(main, optionsService)
         {
             this.firewallService = firewallService;
             this.ruleService = ruleService;

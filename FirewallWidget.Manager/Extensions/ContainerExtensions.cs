@@ -43,7 +43,8 @@ namespace FirewallWidget.Manager.Extensions
             {
                 optionsRepository.UpdateOptions(new Options
                 {
-                    OverrideRules = true
+                    OverrideRules = true,
+                    DockLeft = true
                 });
             }
         }

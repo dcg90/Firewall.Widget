@@ -20,14 +20,19 @@ namespace FirewallWidget.Presentation
 
         private readonly IFirewallService firewallService;
         private readonly IRuleService ruleService;
+        private readonly IOptionsService optionsService;
         private int scrollRulesPosition = 0;
         private bool canScrollRulesDown, canScrollRulesUp;
+
+        private OptionsDto options;
 
         public MainForm(IServiceProvider provider)
         {
             Provider = provider;
             firewallService = Provider.GetRequiredService<IFirewallService>(); ;
-            ruleService = Provider.GetRequiredService<IRuleService>(); ;
+            ruleService = Provider.GetRequiredService<IRuleService>();
+            optionsService = Provider.GetRequiredService<IOptionsService>();
+            LoadOptions();
 
             InitializeComponent();
             MyInitializeComponent();
@@ -37,6 +42,11 @@ namespace FirewallWidget.Presentation
             SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
             pnlRules.AutoScrollPosition = new Point(0, 0);
             pnlScrollUp.Disable();
+        }
+
+        private void LoadOptions()
+        {
+            options = optionsService.ReadOptions();
         }
 
         private void MyInitializeComponent()
@@ -170,13 +180,19 @@ namespace FirewallWidget.Presentation
 
         private void ShowForm()
         {
-            Location = new Point(0, 0);
+            Location = options.DockLeft
+                ? new Point(0, 0)
+                : new Point(Screen.PrimaryScreen.WorkingArea.Width - FORM_WIDTH, 0);
         }
 
         private void HideForm()
         {
             if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
-            { Location = new Point(-40, 0); }
+            {
+                Location = options.DockLeft
+                  ? new Point(-FORM_WIDTH + 2, 0)
+                  : new Point(Screen.PrimaryScreen.WorkingArea.Width - 2, 0);
+            }
         }
 
         private void ResetRulesScroll()
@@ -308,6 +324,5 @@ namespace FirewallWidget.Presentation
 
             UpdateRulesOrder();
         }
-
     }
 }

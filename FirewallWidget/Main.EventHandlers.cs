@@ -29,6 +29,8 @@ namespace FirewallWidget.Presentation
             using (var options = Provider.GetRequiredService<OptionsForm>())
             {
                 options.ShowDialog();
+                LoadOptions();
+                HideForm();
             }
             HideForm();
         }
@@ -58,8 +60,8 @@ namespace FirewallWidget.Presentation
 
         private void MainForm_Shown(object sender, System.EventArgs e)
         {
-            Size = new Size(42, Screen.PrimaryScreen.WorkingArea.Height);
-            Location = new Point(-40, 0);
+            Size = new Size(FORM_WIDTH, Screen.PrimaryScreen.WorkingArea.Height);
+            HideForm();
             ResetRulesScroll();
         }
 
