@@ -15,14 +15,17 @@ namespace FirewallWidget.Manager.Services
     public class RuleService : IRuleService
     {
         private readonly IRulesRepository rulesRepository;
+        private readonly IOptionsRepository optionsRepository;
         private readonly IMapper mapper;
         private static readonly RuleValidator validator = new RuleValidator();
 
         public RuleService(
             IRulesRepository rulesRepository,
+            IOptionsRepository optionsRepository,
             IMapper mapper)
         {
             this.rulesRepository = rulesRepository;
+            this.optionsRepository = optionsRepository;
             this.mapper = mapper;
         }
 
@@ -34,6 +37,29 @@ namespace FirewallWidget.Manager.Services
 
             var rule = rulesRepository.Create(mapper.Map<Rule>(ruleDto));
             return ServiceResult<RuleDto>.Success(mapper.Map<RuleDto>(rule));
+        }
+
+        public ServiceResult<IEnumerable<RuleDto>> Create(params RuleDto[] rules)
+        {
+            rules = rules ?? new RuleDto[0];
+            var options = optionsRepository.ReadOptions();
+            var result = new List<RuleDto>();
+
+            foreach (var rule in rules)
+            {
+                var rulesDb = rulesRepository.Read(rule.Name, (int)rule.Profile, (int)rule.Direction);
+
+                if (options.OverrideRules)
+                {
+                    foreach (var id in rulesDb.Select(r => r.Id))
+                    { rulesRepository.Delete(id); }
+                }
+                var ruleDb = rulesRepository.Create(mapper.Map<Rule>(rule));
+                if (ruleDb != null)
+                { result.Add(mapper.Map<RuleDto>(ruleDb)); }
+            }
+
+            return ServiceResult<IEnumerable<RuleDto>>.Success(result);
         }
 
         public ServiceResult<int> Delete(int key)
@@ -48,7 +74,7 @@ namespace FirewallWidget.Manager.Services
         public IEnumerable<RuleDto> ReadAll()
         {
             return mapper.Map<IEnumerable<RuleDto>>(
-                rulesRepository.Read(r => true).OrderBy(r => r.Name));
+                rulesRepository.Read(r => true).OrderBy(r => r.Order));
         }
 
         public ServiceResult<RuleDto> Read(int key)
@@ -75,20 +101,13 @@ namespace FirewallWidget.Manager.Services
             return ServiceResult<RuleDto>.Success(mapper.Map<RuleDto>(rule));
         }
 
-        public ServiceResult<int> Create(params RuleDto[] rules)
+        public IEnumerable<RuleDto> ReadRules(ProfileDto profile, RuleDirectionDto direction)
         {
-            rules = rules ?? new RuleDto[0];
-            var inserted = 0;
-            foreach (var rule in rules)
-            {
-                if (!rulesRepository.RuleExist(rule.Name))
-                {
-                    rulesRepository.Create(mapper.Map<Rule>(rule));
-                    inserted++;
-                }
-            }
+            int p = (int)profile, dir = (int)direction;
+            var rules = rulesRepository
+                .Read(r => r.Direction == dir && r.Profile == p);
 
-            return ServiceResult<int>.Success(inserted);
+            return mapper.Map<IEnumerable<RuleDto>>(rules);
         }
     }
 }

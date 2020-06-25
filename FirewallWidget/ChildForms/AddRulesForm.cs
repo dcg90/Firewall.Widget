@@ -1,28 +1,31 @@
 ﻿using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
+using FirewallWidget.Presentation;
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace FirewallWidget.ChildForms
 {
-    public partial class AddRulesForm : Form
+    public partial class AddRulesForm : NextToMainForm
     {
         private readonly IFirewallService firewallService;
+        private readonly IRuleService ruleService;
         private ProfileItem currentProfile;
         private DirectionItem currentDirection;
 
         internal List<RuleDto> SelectedRules { get; private set; }
 
-        public AddRulesForm(Form main, IFirewallService firewallService)
+        public AddRulesForm(MainForm main, IFirewallService firewallService,
+            IRuleService ruleService, IOptionsService optionsService)
+            : base(main, optionsService)
         {
             this.firewallService = firewallService;
+            this.ruleService = ruleService;
 
             InitializeComponent();
-
-            Location = PointToScreen(new Point(main.Location.X + main.Width + 2, main.Location.Y));
 
             FillCombos();
             LoadRules();
@@ -64,9 +67,15 @@ namespace FirewallWidget.ChildForms
         private void LoadRules()
         {
             lboxRules.Items.Clear();
+            var ruleNames = new HashSet<string>(ruleService
+                .ReadRules(currentProfile.Profile, currentDirection.Direction)
+                .Select(r => r.Name));
 
             foreach (var rule in firewallService.GetRules(currentProfile.Profile, currentDirection.Direction))
-            { lboxRules.Items.Add(new RuleItem { Rule = rule }); }
+            {
+                if (!ruleNames.Contains(rule.Name))
+                { lboxRules.Items.Add(new RuleItem { Rule = rule }); }
+            }
         }
 
         private void BtnOk_Click(object sender, EventArgs e)

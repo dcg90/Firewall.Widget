@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{962DD15F-CB40-427D-B2B6-62BCC6ACB867}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>FirewallWidget</RootNamespace>
+    <RootNamespace>FirewallWidget.Presentation</RootNamespace>
     <AssemblyName>FirewallWidget</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -37,6 +37,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>firewall-social-preview.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -117,14 +120,24 @@
       <DependentUpon>AddRulesForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ChildForms\DirectionItem.cs" />
-    <Compile Include="ChildForms\ProfileItem.cs" />
-    <Compile Include="ChildForms\RuleItem.cs" />
-    <Compile Include="ChildForms\SelectRule.cs">
+    <Compile Include="ChildForms\NextToMainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ChildForms\SelectRule.Designer.cs">
-      <DependentUpon>SelectRule.cs</DependentUpon>
+    <Compile Include="ChildForms\OptionsForm.cs">
+      <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ChildForms\OptionsForm.Designer.cs">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChildForms\ProfileItem.cs" />
+    <Compile Include="ChildForms\RuleItem.cs" />
+    <Compile Include="ChildForms\SelectRuleForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChildForms\SelectRuleForm.Designer.cs">
+      <DependentUpon>SelectRuleForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FirewallWidgetConstants.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -134,14 +147,29 @@
     <Compile Include="Main.EventHandlers.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="NoTaskBarAltTabForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="PanelExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RuleControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RuleControl.Designer.cs">
+      <DependentUpon>RuleControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RuleControl.Private.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <EmbeddedResource Include="ChildForms\AddRulesForm.resx">
       <DependentUpon>AddRulesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ChildForms\SelectRule.resx">
-      <DependentUpon>SelectRule.cs</DependentUpon>
+    <EmbeddedResource Include="ChildForms\OptionsForm.resx">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChildForms\SelectRuleForm.resx">
+      <DependentUpon>SelectRuleForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
@@ -156,6 +184,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="RuleControl.resx">
+      <DependentUpon>RuleControl.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.manifest" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -188,6 +219,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\down-arrow-disabled.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="firewall-social-preview.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

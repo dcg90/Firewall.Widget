@@ -2,28 +2,37 @@
 using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
+using static FirewallWidget.Presentation.FirewallWidgetConstants;
+
 namespace FirewallWidget.Presentation
 {
-    public partial class MainForm : Form
+    public partial class MainForm : NoTaskBarAltTabForm
     {
+        public IServiceProvider Provider { get; }
+
         private readonly IFirewallService firewallService;
         private readonly IRuleService ruleService;
+        private readonly IOptionsService optionsService;
         private int scrollRulesPosition = 0;
         private bool canScrollRulesDown, canScrollRulesUp;
 
-        public MainForm(IFirewallService firewallService, IRuleService ruleService)
-        {
-            this.firewallService = firewallService;
-            this.ruleService = ruleService;
+        private OptionsDto options;
 
+        public MainForm(IServiceProvider provider)
+        {
+            Provider = provider;
+            firewallService = Provider.GetRequiredService<IFirewallService>(); ;
+            ruleService = Provider.GetRequiredService<IRuleService>();
+            optionsService = Provider.GetRequiredService<IOptionsService>();
+            LoadOptions();
 
             InitializeComponent();
             MyInitializeComponent();
@@ -33,6 +42,11 @@ namespace FirewallWidget.Presentation
             SetOutBoundConnectionState(publicAllowOutboundToolStripMenuItem, ProfileDto.Public);
             pnlRules.AutoScrollPosition = new Point(0, 0);
             pnlScrollUp.Disable();
+        }
+
+        private void LoadOptions()
+        {
+            options = optionsService.ReadOptions();
         }
 
         private void MyInitializeComponent()
@@ -45,6 +59,8 @@ namespace FirewallWidget.Presentation
                 else if (e.Delta > 0)
                 { ScrollRulesUp(); }
             };
+            pnlScrollDown.Tag = SCROLL_DOWN_TAG;
+            pnlScrollUp.Tag = SCROLL_UP_TAG;
         }
 
         private void SetOutBoundConnectionState(ToolStripMenuItem item, ProfileDto profile)
@@ -57,22 +73,70 @@ namespace FirewallWidget.Presentation
 
         private void LoadRules()
         {
-            var lastY = 5;
-            var removeRules = new List<RuleDto>();
             pnlRules.Controls.Clear();
+            AddRulesToPanel(ruleService.ReadAll());
+        }
 
-            foreach (var rule in ruleService.ReadAll())
+        private RuleControl AddRulesToPanel(IEnumerable<RuleDto> rules)
+        {
+            var removeRules = new List<RuleDto>();
+            RuleControl prev = null;
+            RuleControl head = null;
+
+            foreach (var rule in rules)
             {
-                ProcessRule(rule, removeRules, ref lastY);
+                var ruleControl = ProcessRule(rule, removeRules, prev);
+                if (ruleControl != null)
+                {
+                    head = head ?? ruleControl;
+                    ruleControl.HideForm += (rc) => { HideForm(); };
+                    ruleControl.DeleteRule += (rc, r) =>
+                    {
+                        var deleteResult = ruleService.Delete(r.Id);
+                        if (deleteResult.Successful)
+                        {
+                            DetachRuleControl(rc);
+                            pnlRules.Controls.Remove(rc);
+                        }
+                    };
+                    ruleControl.UpdateRule += (rc, r) => { ruleService.Update(r); };
+                    pnlRules.Controls.Add(ruleControl);
+
+                    if (prev != null)
+                    { prev.Next = ruleControl; }
+
+                    prev = ruleControl;
+                }
             }
 
             foreach (var ruleToDelete in removeRules)
             { ruleService.Delete(ruleToDelete.Id); }
 
             ResetRulesScroll();
+
+            return head;
         }
 
-        private void ProcessRule(RuleDto rule, List<RuleDto> removeRules, ref int lastY)
+        private void DetachRuleControl(RuleControl rc)
+        {
+            if (rc.Next != null)
+            { rc.Next.SetPrevious(rc.Previous); }
+            if (rc.Previous != null)
+            { rc.Previous.Next = rc.Next; }
+        }
+
+        private void AttachRuleControl(RuleControl rc, RuleControl prev, RuleControl next)
+        {
+            if (prev != null)
+            { prev.Next = rc; }
+            if (next != null)
+            { next.SetPrevious(rc); }
+
+            rc.SetPrevious(prev);
+            rc.Next = next;
+        }
+
+        private RuleControl ProcessRule(RuleDto rule, List<RuleDto> removeRules, RuleControl prev)
         {
             var matchingFwRules = firewallService.GetMatchingRules(rule.Name, rule.Profile, rule.Direction);
             var matchingFwRulesCount = matchingFwRules.Count();
@@ -83,7 +147,7 @@ namespace FirewallWidget.Presentation
                 FirewallRuleDto fwRule = null;
                 if (matchingFwRulesCount > 1)
                 {
-                    using (var selectRule = new SelectRule(rule, matchingFwRules))
+                    using (var selectRule = new SelectRuleForm(rule, matchingFwRules))
                     {
                         if (selectRule.ShowDialog() == DialogResult.OK)
                         { fwRule = selectRule.SelectedRule; }
@@ -96,10 +160,14 @@ namespace FirewallWidget.Presentation
                 { DeleteRule(rule, removeRules); }
                 else
                 {
-                    var pbox = BuildPictureBox(lastY, rule, fwRule);
-                    lastY += pbox.Height + 5;
+                    var ruleControl = prev == null
+                        ? new RuleControl(rule, fwRule, FIRST_RULE_LOCATION, firewallService)
+                        : new RuleControl(rule, fwRule, prev, firewallService);
+                    return ruleControl;
                 }
             }
+
+            return null;
         }
 
         private static void DeleteRule(RuleDto rule, List<RuleDto> removeRules)
@@ -110,160 +178,22 @@ namespace FirewallWidget.Presentation
             { removeRules.Add(rule); }
         }
 
-        private PictureBox BuildPictureBox(int lastY, RuleDto rule, FirewallRuleDto fwRule)
-        {
-            var (icon, iconGrayScale) = LoadRuleIcon(rule, fwRule);
-
-
-            var pbox = new PictureBox
-            {
-                Location = new Point(5, lastY),
-                Image = firewallService.IsEnabled(fwRule)
-                    ? icon
-                    : iconGrayScale,
-                Size = new Size(32, 32),
-                Cursor = Cursors.Hand,
-                Tag = rule
-            };
-            ruleNameToolTip.SetToolTip(pbox, fwRule.Name);
-            pbox.Click += (sender, e) =>
-            {
-                try
-                {
-                    var enabled = firewallService.SwitchEnabled(fwRule);
-                    pbox.Image = enabled ? icon : iconGrayScale;
-                }
-                catch (Exception exc)
-                {
-                    if (MessageBox.Show(
-                        "The following error occurred: \n" + exc.Message + "\nDelete this rule?", "Error",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes)
-                    {
-                        ruleService.Delete(rule.Id);
-                        LoadRules();
-                    }
-                }
-            };
-            pbox.ContextMenuStrip = pboxContext;
-            pbox.MouseLeave += HideForm;
-            pnlRules.Controls.Add(pbox);
-            return pbox;
-        }
-
-        private (Bitmap, Bitmap) LoadRuleIcon(RuleDto rule, FirewallRuleDto fwRule)
-        {
-            Bitmap iconGrayScale;
-            Bitmap icon;
-
-            if (rule.Icon != null)
-            { (icon, iconGrayScale) = (rule.Icon, (Bitmap)ToolStripRenderer.CreateDisabledImage(rule.Icon)); }
-            else if (File.Exists(fwRule.ProgramPath))
-            {
-                icon = GetExeIcon(fwRule.ProgramPath);
-                iconGrayScale = (Bitmap)ToolStripRenderer.CreateDisabledImage(icon);
-            }
-            else
-            {
-                icon = CreateDefaultRuleIcon(true);
-                iconGrayScale = CreateDefaultRuleIcon(false);
-            }
-
-            DrawDirection(fwRule.Direction, icon);
-            DrawDirection(fwRule.Direction, iconGrayScale);
-
-            return (icon, iconGrayScale);
-        }
-
-        private static Bitmap GetExeIcon(string filename)
-        {
-            return Icon.ExtractAssociatedIcon(filename).ToBitmap();
-        }
-
-        private static Bitmap CreateDefaultRuleIcon(bool enabledRule)
-        {
-            var icon = new Bitmap(32, 32);
-            var graphics = Graphics.FromImage(icon);
-            var rect = new RectangleF(0, 0, 32f, 32f);
-            graphics.FillEllipse(enabledRule ? Brushes.DarkCyan : Brushes.Gray, rect);
-            graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(), new Point(32, 32));
-            graphics.DrawLine(new Pen(Color.Red, 1.5f), new Point(32, 0), new Point(0, 32));
-
-            return icon;
-        }
-
-        private void DrawDirection(RuleDirectionDto direction, Bitmap icon)
-        {
-            var text = direction.ToString();
-            var font = new Font("Consolas", 9.5f, FontStyle.Regular, GraphicsUnit.Point);
-            var graphics = Graphics.FromImage(icon);
-            var textSize = graphics.MeasureString(text, font);
-
-            var rectangle = new RectangleF(
-                new PointF(icon.Width - textSize.Width + 2, icon.Height - textSize.Height + 2),
-                new SizeF(textSize.Width - 2, textSize.Height - 2));
-
-            var brush = new SolidBrush(Color.FromArgb(170, Color.Black));
-
-            graphics.FillPath(brush, RoundedRect(rectangle, 2));
-            graphics.DrawString(text, font, Brushes.White, rectangle.Location);
-        }
-
-        // Reference: https://stackoverflow.com/a/33853557/4152153
-        public static GraphicsPath RoundedRect(RectangleF bounds, float radius)
-        {
-            var diameter = radius * 2;
-            var size = new SizeF(diameter, diameter);
-            var arc = new RectangleF(bounds.Location, size);
-            var path = new GraphicsPath();
-
-            if (radius == 0)
-            {
-                path.AddRectangle(bounds);
-                return path;
-            }
-
-            // top left arc  
-            path.AddArc(arc, 180, 90);
-
-            // top right arc  
-            arc.X = bounds.Right - diameter;
-            path.AddArc(arc, 270, 90);
-
-            // bottom right arc  
-            arc.Y = bounds.Bottom - diameter;
-            path.AddArc(arc, 0, 90);
-
-            // bottom left arc 
-            arc.X = bounds.Left;
-            path.AddArc(arc, 90, 90);
-
-            path.CloseFigure();
-            return path;
-        }
-
         private void ShowForm()
         {
-            Location = new Point(0, 0);
+            Location = options.DockLeft
+                ? new Point(0, 0)
+                : new Point(Screen.PrimaryScreen.WorkingArea.Width - FORM_WIDTH, 0);
         }
 
         private void HideForm()
         {
             if (!ClientRectangle.Contains(PointToClient(Cursor.Position)))
-            { Location = new Point(-40, 0); }
-        }
-
-        protected override CreateParams CreateParams
-        {
-            get
             {
-                var @params = base.CreateParams;
-                @params.ExStyle |= 0x80;
-                return @params;
+                Location = options.DockLeft
+                  ? new Point(-FORM_WIDTH + 2, 0)
+                  : new Point(Screen.PrimaryScreen.WorkingArea.Width - 2, 0);
             }
         }
-
-        private static PictureBox GetPBoxFromSender(object sender)
-        { return ((sender as ToolStripItem)?.Owner as ContextMenuStrip)?.SourceControl as PictureBox; }
 
         private void ResetRulesScroll()
         {
@@ -332,6 +262,67 @@ namespace FirewallWidget.Presentation
                 pnlScrollUp.Enable();
                 canScrollRulesUp = true;
             }
+        }
+
+        private (RuleControl, bool) GetRuleDragInfoFromCursorLocation(Point cursorLocation)
+        {
+            var pnlCursorLocation = pnlRules.PointToClient(cursorLocation);
+            var childControl = pnlRules.GetChildAtPoint(pnlCursorLocation);
+            if (childControl is RuleControl ruleControl)
+            {
+                var ruleCursorLocation = ruleControl.PointToClient(cursorLocation);
+                return (ruleControl, ruleCursorLocation.Y < ruleControl.Height / 2.0);
+            }
+            return (null, false);
+        }
+
+        private RuleControl FindRuleControlFromPoint(RuleControl dragging, int Y, int dirY)
+        {
+            var pt = pnlRules.PointToClient(new Point(pnlRules.Width / 2, Y));
+            while (pnlRules.ClientRectangle.Contains(pt))
+            {
+                if (pnlRules.GetChildAtPoint(pt) is RuleControl ruleControl && ruleControl != dragging)
+                { return ruleControl; }
+                pt.Y += dirY * 31;
+            }
+
+            return null;
+        }
+
+        private void UpdateRulesOrder()
+        {
+            var head = Head;
+            var order = 1;
+
+            while (head != null)
+            {
+                head.Rule.Order = order++;
+                ruleService.Update(head.Rule);
+                head = head.Next;
+            }
+        }
+
+        private RuleControl Head
+            => pnlRules.Controls
+                    .OfType<RuleControl>()
+                    .FirstOrDefault(rc => rc.Previous == null);
+
+        private RuleControl Tail
+            => pnlRules.Controls
+                .OfType<RuleControl>()
+                .FirstOrDefault(rc => rc.Next == null);
+
+        private void AddRules(IEnumerable<RuleDto> addedRules)
+        {
+            var prev = Tail;
+
+            var head = AddRulesToPanel(addedRules);
+
+            head.SetPrevious(prev);
+            if (prev != null)
+            { prev.Next = head; }
+
+            UpdateRulesOrder();
         }
     }
 }

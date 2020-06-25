@@ -17,9 +17,10 @@ namespace FirewallWidget.Manager
         {
             services
                 .AddAutoMapper(Assembly.GetExecutingAssembly())
-                .AddScoped<IEFDbContext, SQLiteDbContext>()
+                .AddTransient<IEFDbContext, SQLiteDbContext>()
                 .ConfigureRepositories()
-                .ConfigureServices();
+                .ConfigureServices()
+                .Ensure();
         }
     }
 }

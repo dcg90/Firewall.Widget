@@ -63,11 +63,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contexts\EFCreateModelExtensions.cs" />
     <Compile Include="Contexts\EFDbContext.cs" />
     <Compile Include="Contexts\SQLServerDbContext.cs" />
     <Compile Include="Contexts\SQLiteDbContext.cs" />
     <Compile Include="Contracts\Context\IEFDbContext.cs" />
     <Compile Include="Contracts\IRepository.cs" />
+    <Compile Include="Contracts\Repositories\IOptionsRepository.cs" />
     <Compile Include="Contracts\Repositories\IRulesRepository.cs" />
     <Compile Include="Migrations\202004112040148_InitialCreate.cs" />
     <Compile Include="Migrations\202004112040148_InitialCreate.designer.cs">
@@ -85,9 +87,22 @@
     <Compile Include="Migrations\202005121407573_add-icon-data.designer.cs">
       <DependentUpon>202005121407573_add-icon-data.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202006161556125_options__rules-idx_name_dir_profile.cs" />
+    <Compile Include="Migrations\202006161556125_options__rules-idx_name_dir_profile.designer.cs">
+      <DependentUpon>202006161556125_options__rules-idx_name_dir_profile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202006190024197_store-rule-order.cs" />
+    <Compile Include="Migrations\202006190024197_store-rule-order.designer.cs">
+      <DependentUpon>202006190024197_store-rule-order.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202006251426381_docking.cs" />
+    <Compile Include="Migrations\202006251426381_docking.designer.cs">
+      <DependentUpon>202006251426381_docking.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\EF\BaseRepository.cs" />
+    <Compile Include="Repositories\EF\OptionsRepository.cs" />
     <Compile Include="Repositories\EF\RulesRepository.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +127,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202005121407573_add-icon-data.resx">
       <DependentUpon>202005121407573_add-icon-data.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006161556125_options__rules-idx_name_dir_profile.resx">
+      <DependentUpon>202006161556125_options__rules-idx_name_dir_profile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006190024197_store-rule-order.resx">
+      <DependentUpon>202006190024197_store-rule-order.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006251426381_docking.resx">
+      <DependentUpon>202006251426381_docking.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
