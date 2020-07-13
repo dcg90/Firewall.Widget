@@ -6,6 +6,9 @@ using NetFwTypeLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+
+using ReGroup = System.Text.RegularExpressions.Group;
 
 namespace FirewallWidget.Manager.Services
 {
@@ -23,7 +26,8 @@ namespace FirewallWidget.Manager.Services
         private static ICollection<Group> groupedRules;
         private static readonly INetFwPolicy2 firewallPolicy
             = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
-
+        private static readonly Regex ipRe = new Regex(@"^(\d{1,3})(?:\.(\d{1,3})){3}$");
+        private static readonly Regex portsRe = new Regex(@"^(\d+(?:-\d+)?)(?:,(\d+(?:-\d+)?))*$");
 
         static FirewallService()
         {
@@ -49,7 +53,6 @@ namespace FirewallWidget.Manager.Services
 
             throw DontExistOrSeveralFound(rule);
         }
-
 
         public IEnumerable<FirewallRuleDto> GetMatchingRules(
             string name, ProfileDto profile, RuleDirectionDto direction)
@@ -172,6 +175,163 @@ namespace FirewallWidget.Manager.Services
                 allowedOutboundConnections
                     ? NET_FW_ACTION_.NET_FW_ACTION_BLOCK
                     : NET_FW_ACTION_.NET_FW_ACTION_ALLOW);
+        }
+
+        public FirewallRuleDto CreateFirewallRule(CreateFirewallRuleDto rule)
+        {
+
+            var (parseOk, ips, proto, ports) = ParseRuleData(rule);
+            if (parseOk)
+            {
+                if (Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule")) is INetFwRule3 fwRule)
+                {
+                    fwRule.Name = rule.Name;
+                    fwRule.Enabled = rule.CreateRuleEnabled;
+                    fwRule.InterfaceTypes = "All";
+                    fwRule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
+                    fwRule.Direction = (NET_FW_RULE_DIRECTION_)rule.Direction;
+                    fwRule.Profiles = (int)rule.Profile;
+
+                    if (!string.IsNullOrEmpty(ips))
+                    { fwRule.RemoteAddresses = ips; }
+
+                    if (proto != null)
+                    {
+                        fwRule.Protocol = proto.Value;
+                        fwRule.RemotePorts = ports;
+                    }
+
+                    if (!string.IsNullOrEmpty(rule.ProgramPath))
+                    { fwRule.ApplicationName = rule.ProgramPath; }
+
+                    firewallPolicy.Rules.Add(fwRule);
+                    var firewallRuleDto = new FirewallRuleDto
+                    {
+                        FwRule = fwRule,
+                        Profile = rule.Profile,
+                        Direction = rule.Direction,
+                        Name = rule.Name,
+                        ProgramPath = rule.ProgramPath
+                    };
+                    UpdateRulesGroup(rule.Profile, rule.Direction, firewallRuleDto);
+
+                    return firewallRuleDto;
+                }
+            }
+
+            return null;
+        }
+
+        private void UpdateRulesGroup(ProfileDto profile, RuleDirectionDto direction, FirewallRuleDto firewallRuleDto)
+        {
+            Group group = null;
+            foreach (var g in groupedRules)
+            {
+                if (g.Profile == profile && g.Direction == direction)
+                { group = g; break; }
+            }
+
+            group = group ?? new Group
+            {
+                Direction = direction,
+                Profile = profile,
+                Rules = Enumerable.Empty<FirewallRuleDto>()
+            };
+
+            group.Rules = group.Rules
+                .Concat(new[] { firewallRuleDto })
+                .OrderBy(r => r.Name);
+        }
+
+        private (bool, string, int?, string) ParseRuleData(CreateFirewallRuleDto rule)
+        {
+            (bool, string, int?, string) invalid = (false, null, null, null);
+
+            if (rule == null)
+            { return invalid; }
+
+            if (string.IsNullOrEmpty(rule.Name))
+            { return invalid; }
+
+            if (string.IsNullOrEmpty(rule.ProgramPath) &&
+                rule.Ips?.Length == 0 &&
+                rule.Protocol == null &&
+                string.IsNullOrEmpty(rule.Ports))
+            { return invalid; }
+
+            var proto = rule.Protocol == null ? null : (int?)rule.Protocol;
+            var (portsOk, ports) = ParsePorts(rule.Ports);
+            var (ipsOk, ips) = ParseIps(rule.Ips);
+
+            if (proto is null)
+            { portsOk = true; ports = null; }
+
+            return ipsOk && portsOk
+                ? (true, ips, proto, ports)
+                : invalid;
+        }
+
+        private (bool, string) ParseIps(IpDto[] ips)
+        {
+            var allIps = new List<string>();
+            foreach (var ip in ips ?? new IpDto[0])
+            {
+                var (ipOk, ipParsed) = ParseIp(ip);
+                if (!ipOk)
+                { return (false, null); }
+                allIps.Add(ipParsed);
+            }
+
+            return (true, /*allIps.Count == 0 ? "*" :*/ string.Join(",", allIps));
+        }
+
+        private (bool, string) ParseIp(IpDto ipDto)
+        {
+            string _BuildIp(string _ip)
+            {
+                var m = ipRe.Match(_ip ?? "");
+                return m.Success
+                    ? string.Join(
+                      ".",
+                      m.Groups.OfType<ReGroup>().Skip(1)
+                              .SelectMany(g => g.Captures.OfType<Capture>())
+                              .Select(c => int.Parse(c.Value).ToString()))
+                    : null;
+            }
+
+            if (!string.IsNullOrEmpty(ipDto.IpOrSubnet))
+            {
+                var ip = _BuildIp(ipDto.IpOrSubnet);
+                if (ip == null)
+                { return (false, null); }
+                var mask = IpDto.IpMask(int.TryParse(ipDto.SubnetMask, out var ipMask) ? ipMask : 32);
+                return (true, $"{ip}/{mask}");
+            }
+
+            var from = _BuildIp(ipDto.From);
+            var to = _BuildIp(ipDto.To);
+
+            return from != null && to != null
+                ? (true, $"{from}-{to}")
+                : (false, null);
+        }
+
+        private static (bool, string) ParsePorts(string ports)
+        {
+            var match = portsRe.Match(ports);
+            if (match.Success)
+            {
+                var portsEnum = ports.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                         .Select(s => s.Split(new[] { '-' }, StringSplitOptions.RemoveEmptyEntries))
+                         .Select(arr => string.Join("-", arr.Select(s => int.Parse(s))));
+                if (portsEnum.Where(s => s.Contains("-"))
+                             .Select(s => s.Split('-'))
+                             .Any(arr => int.Parse(arr[0]) >= int.Parse(arr[1])))
+                { return (false, null); }
+
+                return (true, string.Join(",", portsEnum));
+            }
+            return (false, null);
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Drawing;
+﻿using FirewallWidget.ChildForms;
+using FirewallWidget.Manager.DTO;
+
+using System.Drawing;
 
 namespace FirewallWidget.Presentation
 {
@@ -15,5 +18,19 @@ namespace FirewallWidget.Presentation
         public const string SCROLL_DOWN_TAG = "ScrollDown";
 
         public const int FORM_WIDTH = 42;
+
+        public static readonly ProfileItem[] PROFILES = new[]
+        {
+            new ProfileItem { Display = "Domain", Profile = ProfileDto.Domain },
+            new ProfileItem { Display = "Private", Profile = ProfileDto.Private },
+            new ProfileItem { Display = "Public", Profile = ProfileDto.Public }
+        };
+
+        public static readonly DirectionItem[] DIRECTIONS = new[]
+        {
+            new DirectionItem { Display = "In", Direction = RuleDirectionDto.In },
+            new DirectionItem { Display = "Out", Direction = RuleDirectionDto.Out },
+            new DirectionItem { Display = "Max", Direction = RuleDirectionDto.Max }
+        };
     }
 }

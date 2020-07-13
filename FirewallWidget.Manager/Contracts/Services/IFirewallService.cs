@@ -6,6 +6,8 @@ namespace FirewallWidget.Manager.Contracts.Services
 {
     public interface IFirewallService
     {
+        FirewallRuleDto CreateFirewallRule(CreateFirewallRuleDto rule);
+
         IEnumerable<FirewallRuleDto> GetRules(ProfileDto profile, RuleDirectionDto direction);
 
         bool IsEnabled(FirewallRuleDto rule);
