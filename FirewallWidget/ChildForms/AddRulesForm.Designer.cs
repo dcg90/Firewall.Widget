@@ -32,7 +32,7 @@
             this.cboxProfiles = new System.Windows.Forms.ComboBox();
             this.lboxRules = new System.Windows.Forms.ListBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.btnRefreshRules = new System.Windows.Forms.Button();
+            this.btnMenu = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
@@ -40,8 +40,13 @@
             this.btnOk = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.infoToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.addRuleMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.refreshListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createRuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.panel2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.addRuleMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboxProfiles
@@ -69,45 +74,48 @@
             // panel2
             // 
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.btnRefreshRules);
+            this.panel2.Controls.Add(this.btnMenu);
             this.panel2.Controls.Add(this.btnClose);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(495, 25);
+            this.panel2.Padding = new System.Windows.Forms.Padding(2);
+            this.panel2.Size = new System.Drawing.Size(495, 28);
             this.panel2.TabIndex = 3;
             // 
-            // btnRefreshRules
+            // btnMenu
             // 
-            this.btnRefreshRules.BackColor = System.Drawing.SystemColors.GradientActiveCaption;
-            this.btnRefreshRules.Cursor = System.Windows.Forms.Cursors.Default;
-            this.btnRefreshRules.Dock = System.Windows.Forms.DockStyle.Left;
-            this.btnRefreshRules.FlatAppearance.BorderColor = System.Drawing.SystemColors.Control;
-            this.btnRefreshRules.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRefreshRules.Location = new System.Drawing.Point(0, 0);
-            this.btnRefreshRules.Name = "btnRefreshRules";
-            this.btnRefreshRules.Size = new System.Drawing.Size(103, 23);
-            this.btnRefreshRules.TabIndex = 1;
-            this.btnRefreshRules.Text = "Refresh List";
-            this.infoToolTip.SetToolTip(this.btnRefreshRules, "Refresh only when needed. This action may increase the RAM usage.");
-            this.btnRefreshRules.UseVisualStyleBackColor = false;
-            this.btnRefreshRules.Click += new System.EventHandler(this.BtnRefreshRules_Click);
+            this.btnMenu.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnMenu.Image = global::FirewallWidget.Presentation.Properties.Resources.down_arrow;
+            this.btnMenu.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.btnMenu.Location = new System.Drawing.Point(2, 2);
+            this.btnMenu.Name = "btnMenu";
+            this.btnMenu.Size = new System.Drawing.Size(65, 22);
+            this.btnMenu.TabIndex = 3;
+            this.btnMenu.Text = "Menu";
+            this.btnMenu.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnMenu.UseVisualStyleBackColor = true;
+            this.btnMenu.Click += new System.EventHandler(this.BtnMenu_Click);
             // 
             // btnClose
             // 
+            this.btnClose.BackColor = System.Drawing.Color.Brown;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnClose.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnClose.Location = new System.Drawing.Point(463, 0);
+            this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnClose.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnClose.Location = new System.Drawing.Point(461, 2);
             this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(30, 23);
+            this.btnClose.Size = new System.Drawing.Size(30, 22);
             this.btnClose.TabIndex = 0;
             this.btnClose.Text = "X";
-            this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new System.EventHandler(this.BtnClose_Click);
             // 
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.btnCancel);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.cboxDirections);
             this.panel1.Controls.Add(this.btnOk);
@@ -115,9 +123,9 @@
             this.panel1.Controls.Add(this.lboxRules);
             this.panel1.Controls.Add(this.cboxProfiles);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 25);
+            this.panel1.Location = new System.Drawing.Point(0, 28);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(495, 416);
+            this.panel1.Size = new System.Drawing.Size(495, 405);
             this.panel1.TabIndex = 4;
             // 
             // label2
@@ -142,11 +150,11 @@
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOk.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOk.Location = new System.Drawing.Point(374, 382);
+            this.btnOk.Location = new System.Drawing.Point(326, 378);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(118, 31);
+            this.btnOk.Size = new System.Drawing.Size(84, 24);
             this.btnOk.TabIndex = 3;
-            this.btnOk.Text = "Add Rules";
+            this.btnOk.Text = "Add";
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.BtnOk_Click);
             // 
@@ -165,12 +173,46 @@
             this.infoToolTip.InitialDelay = 500;
             this.infoToolTip.ReshowDelay = 100;
             // 
+            // addRuleMenu
+            // 
+            this.addRuleMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.refreshListToolStripMenuItem,
+            this.createRuleToolStripMenuItem});
+            this.addRuleMenu.Name = "contextMenuStrip1";
+            this.addRuleMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
+            this.addRuleMenu.Size = new System.Drawing.Size(181, 70);
+            // 
+            // refreshListToolStripMenuItem
+            // 
+            this.refreshListToolStripMenuItem.Name = "refreshListToolStripMenuItem";
+            this.refreshListToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.refreshListToolStripMenuItem.Text = "&Refresh List";
+            this.refreshListToolStripMenuItem.Click += new System.EventHandler(this.RefreshListToolStripMenuItem_Click);
+            // 
+            // createRuleToolStripMenuItem
+            // 
+            this.createRuleToolStripMenuItem.Name = "createRuleToolStripMenuItem";
+            this.createRuleToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.createRuleToolStripMenuItem.Text = "&Create Rule";
+            this.createRuleToolStripMenuItem.Click += new System.EventHandler(this.CreateRuleToolStripMenuItem_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.Location = new System.Drawing.Point(415, 379);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 7;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            // 
             // AddRulesForm
             // 
             this.AcceptButton = this.btnOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(495, 441);
+            this.CancelButton = this.btnCancel;
+            this.ClientSize = new System.Drawing.Size(495, 433);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel2);
             this.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -182,6 +224,7 @@
             this.panel2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.addRuleMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -197,7 +240,11 @@
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cboxDirections;
-        private System.Windows.Forms.Button btnRefreshRules;
         private System.Windows.Forms.ToolTip infoToolTip;
+        private System.Windows.Forms.Button btnMenu;
+        private System.Windows.Forms.ContextMenuStrip addRuleMenu;
+        private System.Windows.Forms.ToolStripMenuItem refreshListToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createRuleToolStripMenuItem;
+        private System.Windows.Forms.Button btnCancel;
     }
 }

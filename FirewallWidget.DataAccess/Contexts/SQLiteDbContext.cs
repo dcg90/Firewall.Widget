@@ -1,4 +1,5 @@
 ﻿using SQLite.CodeFirst;
+
 using System.Data.Entity;
 
 namespace FirewallWidget.DataAccess.Contexts

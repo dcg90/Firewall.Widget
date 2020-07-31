@@ -1,5 +1,6 @@
 ﻿using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
+
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -8,6 +9,8 @@ namespace FirewallWidget.ChildForms
     public class NextToMainForm : Form
     {
         private readonly OptionsDto options;
+
+        public NextToMainForm() { }
 
         private NextToMainForm(IOptionsService optionsService)
         { options = optionsService.ReadOptions(); }

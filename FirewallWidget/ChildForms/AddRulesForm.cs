@@ -1,11 +1,15 @@
 ﻿using FirewallWidget.Manager.Contracts.Services;
 using FirewallWidget.Manager.DTO;
 using FirewallWidget.Presentation;
+using FirewallWidget.Presentation.ChildForms.CreateRule;
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+
+using static FirewallWidget.Presentation.FirewallWidgetConstants;
 
 namespace FirewallWidget.ChildForms
 {
@@ -13,6 +17,7 @@ namespace FirewallWidget.ChildForms
     {
         private readonly IFirewallService firewallService;
         private readonly IRuleService ruleService;
+        private readonly IOptionsService optionsService;
         private ProfileItem currentProfile;
         private DirectionItem currentDirection;
 
@@ -24,6 +29,7 @@ namespace FirewallWidget.ChildForms
         {
             this.firewallService = firewallService;
             this.ruleService = ruleService;
+            this.optionsService = optionsService;
 
             InitializeComponent();
 
@@ -33,13 +39,11 @@ namespace FirewallWidget.ChildForms
 
         private void FillCombos()
         {
-            cboxProfiles.Items.Add(new ProfileItem { Display = "Domain", Profile = ProfileDto.Domain });
-            cboxProfiles.Items.Add(new ProfileItem { Display = "Private", Profile = ProfileDto.Private });
-            cboxProfiles.Items.Add(currentProfile = new ProfileItem { Display = "Public", Profile = ProfileDto.Public });
+            cboxProfiles.Items.AddRange(PROFILES);
+            currentProfile = PROFILES[2];
 
-            cboxDirections.Items.Add(new DirectionItem { Display = "In", Direction = RuleDirectionDto.In });
-            cboxDirections.Items.Add(currentDirection = new DirectionItem { Display = "Out", Direction = RuleDirectionDto.Out });
-            cboxDirections.Items.Add(new DirectionItem { Display = "Max", Direction = RuleDirectionDto.Max });
+            cboxDirections.Items.AddRange(DIRECTIONS);
+            currentDirection = DIRECTIONS[1];
 
             cboxProfiles.SelectedItem = currentProfile;
             cboxDirections.SelectedItem = currentDirection;
@@ -102,10 +106,32 @@ namespace FirewallWidget.ChildForms
 
         }
 
-        private void BtnRefreshRules_Click(object sender, EventArgs e)
+        private void BtnMenu_Click(object sender, EventArgs e)
+        {
+            addRuleMenu.Show(PointToScreen(
+                    new Point(
+                        btnMenu.Location.X + 2,
+                        btnMenu.Location.Y + btnMenu.Height + 2)));
+        }
+
+        private void RefreshListToolStripMenuItem_Click(object sender, EventArgs e)
         {
             firewallService.Refresh();
             LoadRules();
+        }
+
+        private void CreateRuleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var createRule = new CreateFirewallRuleForm(this, optionsService, firewallService))
+            {
+                if (createRule.ShowDialog() == DialogResult.OK && createRule.Rule != null)
+                {
+                    var rule = new RuleItem { Rule = createRule.Rule };
+                    lboxRules.Items.Add(rule);
+                    lboxRules.SelectedItems.Clear();
+                    lboxRules.SelectedItem = rule;
+                }
+            }
         }
     }
 }
